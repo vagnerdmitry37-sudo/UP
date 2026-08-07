@@ -11,7 +11,7 @@ public class AuthController(IAuthService aus, ITokenService ts) : ControllerBase
     private readonly ITokenService _ts = ts;
 
     [AllowAnonymous]
-    [HttpPost(AuthRouts.login)]
+    [HttpPost(AuthRouts.Login)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await _aus.Login(request);

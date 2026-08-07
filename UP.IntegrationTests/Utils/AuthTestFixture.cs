@@ -11,6 +11,8 @@ namespace UP.IntegrationTests.Utils
         public readonly CustomWebApplicationFactory _factory;
         public CustomWebApplicationFactory Factory => _factory;
         public HttpClient Client { get; private set; } = null!;
+        private readonly string authUserEmail = "admin@test.com";
+        private readonly string authUserPassword = "Password123!";
 
         public AuthTestFixture()
         {
@@ -38,20 +40,20 @@ namespace UP.IntegrationTests.Utils
 
             var user = new AuthUser
             {
-                Email = "admin@test.com",
-                UserName = "admin@test.com",
+                Email = authUserEmail,
+                UserName = authUserEmail,
                 EmailConfirmed = true
             };
 
-            await userManager.CreateAsync(user, "Password123!");
+            await userManager.CreateAsync(user, authUserPassword);
         }
 
         private async Task LoginAuthUser()
         {
-            var response = await Client.PostAsJsonAsync($"{AuthRouts.Base}/{AuthRouts.login}", new
+            var response = await Client.PostAsJsonAsync($"{AuthRouts.Base}/{AuthRouts.Login}", new
             {
-                Email = "admin@test.com",
-                Password = "Password123!",
+                Email = authUserEmail,
+                Password = authUserPassword,
             });
 
             response.EnsureSuccessStatusCode();
