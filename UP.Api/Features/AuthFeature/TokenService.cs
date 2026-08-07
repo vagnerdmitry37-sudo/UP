@@ -52,7 +52,7 @@ namespace UP.Api.Features.AuthFeature
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return $"Invalid token. Message: {ex.Message}";
             }
         }
 

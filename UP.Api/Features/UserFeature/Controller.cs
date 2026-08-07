@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UP.Api.Features.UserFeature;
 
 [ApiController]
-[Route("api/user")]
+[Route(UserRoutes.Base)]
 public class UserController(IUserService us) : ControllerBase
 {
     private readonly IUserService _us = us;
 
     [HttpPost]
-    public async Task<ActionResult> Create(string userDtos)
+    public async Task<ActionResult> Create()
     {
         return Created();
     }
@@ -17,6 +16,7 @@ public class UserController(IUserService us) : ControllerBase
     [HttpGet]
     public async Task<ActionResult> Get()
     {
-        return Ok(DateTime.UtcNow);
+        var response = "Hello";
+        return Ok(response);
     }
 }

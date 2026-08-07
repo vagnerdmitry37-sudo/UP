@@ -7,7 +7,7 @@ namespace UP.Api.Features.AuthFeature
     public interface IAuthService
     {
         Task Register(RegisterRequest request);
-        Task<AuthResponse> Login(LoginRequest request);
+        Task<LoginResponse?> Login(LoginRequest request);
     }
 
     public class AuthService(UserManager<AuthUser> userManager, ITokenService ts) : IAuthService
@@ -43,14 +43,13 @@ namespace UP.Api.Features.AuthFeature
             }
         }
 
-        public async Task<AuthResponse> Login(LoginRequest request)
+        public async Task<LoginResponse?> Login(LoginRequest request)
         {
-            var authUser = await _userManager.FindByEmailAsync(request.Email) ?? throw new Exception("Invalid credentials");
+            var authUser = await _userManager.FindByEmailAsync(request.Email);
+            if (authUser == null) return null;
+
             var valid = await _userManager.CheckPasswordAsync(authUser, request.Password);
-
-
-            if (!valid)
-                throw new Exception("Invalid credentials");
+            if (!valid) return null;
 
             var refreshToken = _ts.GenerateRefreshToken();
 
@@ -63,7 +62,7 @@ namespace UP.Api.Features.AuthFeature
 
             await _userManager.UpdateAsync(authUser);
 
-            return new AuthResponse
+            return new LoginResponse
             {
                 ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15),
                 RefreshToken = refreshToken,

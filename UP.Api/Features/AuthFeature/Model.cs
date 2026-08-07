@@ -7,7 +7,7 @@ namespace UP.Api.Features.AuthFeature
         public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
     }
 
-    public class AuthResponse
+    public class LoginResponse
     {
         public string AccessToken { get; set; } = "";
         public string RefreshToken { get; set; } = "";
