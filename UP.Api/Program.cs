@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UP.Api.Db;
+using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature;
 using UP.Api.Features.UserFeature;
@@ -57,6 +58,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<AppErrorMiddleware>();
 
 app.Run();
 

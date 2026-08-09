@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UP.Api.Features.AuthFeature;
@@ -15,8 +16,6 @@ public class AuthController(IAuthService aus, ITokenService ts) : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await _aus.Login(request);
-        if (result == null) return Unauthorized();
-
         return Ok(result);
     }
 
@@ -25,6 +24,16 @@ public class AuthController(IAuthService aus, ITokenService ts) : ControllerBase
     {
         await _aus.Register(request);
         return Created();
+    }
+
+    [AllowAnonymous]
+    [HttpGet(AuthRouts.RefreshAccessToken)]
+    public async Task<IActionResult> RefreshAccessToken(RefreshTokenRequest request)
+    {
+        var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+        var result = _ts.ValidateAccessToken(token);
+
+        return Ok(result);
     }
 
     [AllowAnonymous]

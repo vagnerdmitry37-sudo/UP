@@ -7,18 +7,11 @@ namespace UP.Api.Features.AuthFeature
         public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
     }
 
-    public class LoginResponse
-    {
-        public string AccessToken { get; set; } = "";
-        public string RefreshToken { get; set; } = "";
-        public DateTimeOffset ExpiresAt { get; set; }
-    }
-
     public class RefreshToken
     {
         public int Id { get; set; }
 
-        public string Token { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
 
         public DateTimeOffset ExpiresAt { get; set; }
 

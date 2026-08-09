@@ -9,8 +9,8 @@ namespace UP.Api.Features.AuthFeature
     public interface ITokenService
     {
         string GenerateAccessToken(AuthUser authUser);
-        string GenerateRefreshToken();
-        string ValidateAccessToken(string token);
+        RefreshToken GenerateRefreshToken();
+        bool ValidateAccessToken(string token);
     }
 
     public class TokenService(IConfiguration config) : ITokenService
@@ -37,22 +37,27 @@ namespace UP.Api.Features.AuthFeature
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string GenerateRefreshToken()
+        public RefreshToken GenerateRefreshToken()
         {
-            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            return new RefreshToken
+            {
+                Value = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(30)
+            };
         }
 
-        public string ValidateAccessToken(string token)
+        public bool ValidateAccessToken(string token)
         {
-            var handler = new JwtSecurityTokenHandler();
             try
             {
+                var handler = new JwtSecurityTokenHandler();
                 handler.ValidateToken(token, GetTokenValidationParameters(_config), out var validatedToken);
-                return "Valid token";
+                return true;
             }
-            catch (Exception ex)
+            catch
             {
-                return $"Invalid token. Message: {ex.Message}";
+                return false;
             }
         }
 

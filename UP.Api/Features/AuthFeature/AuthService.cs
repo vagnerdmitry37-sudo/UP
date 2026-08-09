@@ -1,13 +1,14 @@
 ﻿using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
+using UP.Api.Features.AppErrorFeature;
 
 namespace UP.Api.Features.AuthFeature
 {
     public interface IAuthService
     {
         Task Register(RegisterRequest request);
-        Task<LoginResponse?> Login(LoginRequest request);
+        Task<LoginResponse> Login(LoginRequest request);
     }
 
     public class AuthService(UserManager<AuthUser> userManager, ITokenService ts) : IAuthService
@@ -18,13 +19,7 @@ namespace UP.Api.Features.AuthFeature
         public async Task Register(RegisterRequest request)
         {
             var existing = await _userManager.FindByEmailAsync(request.Email);
-
-
-            if (existing != null)
-            {
-                throw new Exception("User already exists");
-            }
-
+            if (existing != null) throw new AuthError("An account with this email already exists.");
 
             var authUser = new AuthUser()
             {
@@ -32,40 +27,28 @@ namespace UP.Api.Features.AuthFeature
                 UserName = request.Email,
             };
 
-
             var result = await _userManager.CreateAsync(authUser, request.Password);
-
-
-            if (!result.Succeeded)
-            {
-                var errors = result.Errors.Select(x => x.Description);
-                throw new Exception(string.Join(", ", errors));
-            }
+            if (!result.Succeeded) throw new AuthError(string.Join(", ", result.Errors.Select(x => x.Description)));
         }
 
-        public async Task<LoginResponse?> Login(LoginRequest request)
+        public async Task<LoginResponse> Login(LoginRequest request)
         {
+            var errorMessage = "Not valid email or password";
+
             var authUser = await _userManager.FindByEmailAsync(request.Email);
-            if (authUser == null) return null;
+            if (authUser == null) throw new AuthError(errorMessage);
 
             var valid = await _userManager.CheckPasswordAsync(authUser, request.Password);
-            if (!valid) return null;
+            if (!valid) throw new AuthError(errorMessage);
 
-            var refreshToken = _ts.GenerateRefreshToken();
-
-            authUser.RefreshTokens.Add(new RefreshToken
-            {
-                Token = refreshToken,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(30)
-            });
+            var refreshTolen = _ts.GenerateRefreshToken();
+            authUser.RefreshTokens.Add(refreshTolen);
 
             await _userManager.UpdateAsync(authUser);
 
             return new LoginResponse
             {
-                ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15),
-                RefreshToken = refreshToken,
+                RefreshToken = refreshTolen.Value,
                 AccessToken = _ts.GenerateAccessToken(authUser),
             };
         }

@@ -1,22 +1,18 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Identity.Data;
 using System.Net;
-using System.Net.Http.Json;
-using UP.Api.Features.AuthFeature;
 using UP.Api.Features.UserFeature;
-using UP.IntegrationTests.Utils;
+using UP.IntegrationTests.Features.Fixtures;
 
 namespace UP.IntegrationTests.Features.AuthFeature
 {
-    public class UserControllerTests(AuthTestFixture fixture) : IClassFixture<AuthTestFixture>
+    public class UserControllerTests(IntegrationFixture fixture) : IClassFixture<IntegrationFixture>
     {
-        private readonly HttpClient _client = fixture.Client;
-
         [Fact]
         public async Task ShouldReturnHello()
         {
-            var response = await _client.GetAsync(UserRoutes.Base);
-
+            await fixture.Auth.Register();
+            await fixture.Auth.Login();
+            var response = await fixture.Client.GetAsync(UserRoutes.Base);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
     }

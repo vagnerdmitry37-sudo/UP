@@ -4,36 +4,17 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using UP.Api.Features.AuthFeature;
 
-namespace UP.IntegrationTests.Utils
+namespace UP.IntegrationTests.Features.Fixtures
 {
-    public class AuthTestFixture : IAsyncLifetime
+    public class AuthHelper(HttpClient client, CustomWebApplicationFactory factory)
     {
-        public readonly CustomWebApplicationFactory _factory;
-        public CustomWebApplicationFactory Factory => _factory;
-        public HttpClient Client { get; private set; } = null!;
+        private readonly HttpClient _client = client;
+        private readonly CustomWebApplicationFactory _factory = factory;
+
         private readonly string authUserEmail = "admin@test.com";
         private readonly string authUserPassword = "Password123!";
 
-        public AuthTestFixture()
-        {
-            _factory = new CustomWebApplicationFactory();
-        }
-
-        public async Task InitializeAsync()
-        {
-            await SeedAuthUser();
-            Client = _factory.CreateClient();
-            await LoginAuthUser();
-        }
-
-        public Task DisposeAsync()
-        {
-            Client.Dispose();
-            Factory.Dispose();
-            return Task.CompletedTask;
-        }
-
-        private async Task SeedAuthUser()
+        public async Task Register()
         {
             using var scope = _factory.Services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
@@ -48,9 +29,9 @@ namespace UP.IntegrationTests.Utils
             await userManager.CreateAsync(user, authUserPassword);
         }
 
-        private async Task LoginAuthUser()
+        public async Task Login()
         {
-            var response = await Client.PostAsJsonAsync($"{AuthRouts.Base}/{AuthRouts.Login}", new
+            var response = await _client.PostAsJsonAsync($"{AuthRouts.Base}/{AuthRouts.Login}", new
             {
                 Email = authUserEmail,
                 Password = authUserPassword,
@@ -59,7 +40,8 @@ namespace UP.IntegrationTests.Utils
             response.EnsureSuccessStatusCode();
 
             var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse!.AccessToken);
+            _client.DefaultRequestHeaders.Authorization = 
+                new AuthenticationHeaderValue("Bearer", loginResponse!.AccessToken);
         }
     }
 }
