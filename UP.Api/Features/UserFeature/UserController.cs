@@ -16,7 +16,6 @@ public class UserController(IUserService us) : ControllerBase
     [HttpGet]
     public async Task<ActionResult> Get()
     {
-        var response = "Hello";
-        return Ok(response);
+        return Ok("Hello");
     }
 }

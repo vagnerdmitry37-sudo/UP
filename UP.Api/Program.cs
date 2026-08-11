@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
-using UP.Api.Features.AuthFeature;
+using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Services;
 using UP.Api.Features.UserFeature;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +23,9 @@ builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IAudiLogRepository, AudiLogRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
 
 builder.Services.AddIdentityCore<AuthUser>(options =>
 {
@@ -41,7 +44,7 @@ builder.Services.AddIdentityCore<AuthUser>(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = TokenService.GetTokenValidationParameters(builder.Configuration);
+        options.TokenValidationParameters = AccessTokenService.GetTokenValidationParameters(builder.Configuration);
     });
 
 builder.Services.AddControllers(options =>

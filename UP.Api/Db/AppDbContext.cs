@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UP.Api.Features.AuditLogFeature;
-using UP.Api.Features.AuthFeature;
+using UP.Api.Features.AuthFeature.Models;
 using UP.Api.Features.CollectionFeature;
 using UP.Api.Models;
 

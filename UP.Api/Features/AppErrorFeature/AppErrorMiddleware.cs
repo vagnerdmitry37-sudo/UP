@@ -13,18 +13,18 @@
             catch (AppError ex)
             {
                 context.Response.StatusCode = ex.StatusCode;
-                await context.Response.WriteAsJsonAsync(new
+                await context.Response.WriteAsJsonAsync(new AppErrorResponses
                 {
-                    ex.Message,
-                    ex.StatusCode
+                    Message = ex.Message,
+                    StatusCode = ex.StatusCode
                 });
             }
             catch (Exception ex)
             {
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsJsonAsync(new
+                await context.Response.WriteAsJsonAsync(new AppErrorResponses
                 {
-                    ex.Message,
+                    Message = ex.Message,
                     StatusCode = StatusCodes.Status500InternalServerError
                 });
             }

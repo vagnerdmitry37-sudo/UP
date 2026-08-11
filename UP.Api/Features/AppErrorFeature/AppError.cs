@@ -10,4 +10,9 @@
     {
         override public int StatusCode { get; set; } = StatusCodes.Status401Unauthorized;
     }
+
+    public class NotFoundError(string message) : AppError(message)
+    {
+        override public int StatusCode { get; set; } = StatusCodes.Status404NotFound;
+    }
 }

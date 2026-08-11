@@ -1,24 +1,22 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
+using UP.Api.Features.AuthFeature.Models;
 
-namespace UP.Api.Features.AuthFeature
+namespace UP.Api.Features.AuthFeature.Services
 {
-    public interface ITokenService
+    public interface IAccessTokenService
     {
-        string GenerateAccessToken(AuthUser authUser);
-        RefreshToken GenerateRefreshToken();
-        bool ValidateAccessToken(string token);
+        string GenerateToken(AuthUser authUser);
     }
 
-    public class TokenService(IConfiguration config) : ITokenService
+    public class AccessTokenService(IConfiguration config) : IAccessTokenService
     {
         private readonly IConfiguration _config = config;
         private readonly int accessTokeExpiresSeconds = 600;
 
-        public string GenerateAccessToken(AuthUser authUser)
+        public string GenerateToken(AuthUser authUser)
         {
             var claims = new[] {
                     new Claim(JwtRegisteredClaimNames.Sub, authUser.Id.ToString()),
@@ -35,30 +33,6 @@ namespace UP.Api.Features.AuthFeature
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public RefreshToken GenerateRefreshToken()
-        {
-            return new RefreshToken
-            {
-                Value = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(30)
-            };
-        }
-
-        public bool ValidateAccessToken(string token)
-        {
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                handler.ValidateToken(token, GetTokenValidationParameters(_config), out var validatedToken);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         public static TokenValidationParameters GetTokenValidationParameters(IConfiguration config)
