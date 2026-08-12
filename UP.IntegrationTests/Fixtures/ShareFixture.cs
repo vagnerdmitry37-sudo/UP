@@ -23,10 +23,10 @@ namespace UP.IntegrationTests.Fixtures
         public async Task InitializeAsync()
         {
             await _container.StartAsync();
-            Factory = new CustomWebApplicationFactory();
+            Factory = new CustomWebApplicationFactory(_container.GetConnectionString());
             Client = Factory.CreateClient();
             await MigrateDatabaseAsync();
-            Auth = new AuthHelper(Factory, Client);
+            Auth = new AuthHelper(Factory);
         }
 
         public async Task DisposeAsync()

@@ -3,15 +3,12 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UP.Api.Features.AuthFeature;
 using UP.Api.Features.AuthFeature.Requests;
-using UP.Api.Features.AuthFeature.Responses;
 using UP.Api.Features.AuthFeature.Services;
 
 [ApiController]
-[Route(AuthRouts.Base)]
 public class AuthController(IAuthService aus) : ControllerBase
 {
     private readonly IAuthService _aus = aus;
-
 
     [HttpPost(AuthRouts.Register)]
     public async Task<IActionResult> Register(RegisterRequest request)
