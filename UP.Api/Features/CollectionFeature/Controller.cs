@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using UP.Api.Db;
-using Mapster;
 using UP.Api.Features.CollectionFeature;
 
 [ApiController]

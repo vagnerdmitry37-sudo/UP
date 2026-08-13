@@ -1,11 +1,10 @@
-﻿namespace UP.Api.Features.AuthFeature
-{
-    public static class AuthRouts
-    {
-        private const string Base = "api/auth";
+namespace UP.Api.Features.AuthFeature;
 
-        public const string Login = $"{Base}/login";
-        public const string Refresh = $"{Base}/refresh";
-        public const string Register = $"{Base}/register";
-    }
+public static class AuthRouts
+{
+    private const string _base = "api/auth";
+
+    public const string Login = $"{_base}/login";
+    public const string Refresh = $"{_base}/refresh";
+    public const string Register = $"{_base}/register";
 }

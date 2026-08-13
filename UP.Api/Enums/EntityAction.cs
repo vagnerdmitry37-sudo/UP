@@ -1,9 +1,8 @@
-﻿namespace UP.Api.Enums
+namespace UP.Api.Enums;
+
+public enum EntityActions
 {
-    public enum EntityActions
-    {
-        Update,
-        Create,
-        Delete,
-    }
+    Update,
+    Create,
+    Delete,
 }

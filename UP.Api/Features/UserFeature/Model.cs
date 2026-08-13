@@ -1,8 +1,7 @@
-﻿namespace UP.Api.Features.UserFeature
+namespace UP.Api.Features.UserFeature;
+
+public class User
 {
-    public class User
-    {
-        public string Name { get; set; } = "";
-        public string Surname { get; set; } = "";
-    }
+    public string Name { get; set; } = "";
+    public string Surname { get; set; } = "";
 }

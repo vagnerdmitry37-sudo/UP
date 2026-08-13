@@ -12,7 +12,7 @@ on:
       - develop
 
 jobs:
-  Integraion-tests:
+  Integration-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,12 @@ jobs:
 
       - name: Restore UP.Api
         run: dotnet restore UP.Api/UP.Api.csproj
+
+      - name: Check API formatting
+        run: dotnet format UP.Api/UP.Api.csproj --verify-no-changes --no-restore --exclude UP.Api/Migrations
+
+      - name: Check integration tests formatting
+        run: dotnet format UP.IntegrationTests/UP.IntegrationTests.csproj --verify-no-changes --no-restore
 
       - name: Run tests
         run: dotnet test UP.IntegrationTests/UP.IntegrationTests.csproj

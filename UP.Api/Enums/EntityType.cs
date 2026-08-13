@@ -1,12 +1,11 @@
-﻿namespace UP.Api.Enums
+namespace UP.Api.Enums;
+
+public enum EntityType
 {
-    public enum EntityType
-    {
-        Users,
-        Orders,
-        AuditLogs,
-        Transfers,
-        Excursions,
-        Collections,
-    }
+    Users,
+    Orders,
+    AuditLogs,
+    Transfers,
+    Excursions,
+    Collections,
 }

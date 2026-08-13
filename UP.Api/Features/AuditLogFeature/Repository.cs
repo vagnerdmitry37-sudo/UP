@@ -1,19 +1,18 @@
-﻿using UP.Api.Db;
+using UP.Api.Db;
 
-namespace UP.Api.Features.AuditLogFeature
+namespace UP.Api.Features.AuditLogFeature;
+
+public interface IAudiLogRepository
 {
-    public interface IAudiLogRepository
-    {
-        public Task AddRangeAsync(IEnumerable<AuditLog> auditLogs);
-    }
+    Task AddRangeAsync(IEnumerable<AuditLog> auditLogs);
+}
 
-    public class AudiLogRepository(AppDbContext abc) : IAudiLogRepository
-    {
-        private readonly AppDbContext _abc = abc;
+public class AudiLogRepository(AppDbContext abc) : IAudiLogRepository
+{
+    private readonly AppDbContext _abc = abc;
 
-        public Task AddRangeAsync(IEnumerable<AuditLog> auditLogs)
-        {
-            return _abc.AddRangeAsync(auditLogs);
-        }
+    public Task AddRangeAsync(IEnumerable<AuditLog> auditLogs)
+    {
+        return _abc.AddRangeAsync(auditLogs);
     }
 }

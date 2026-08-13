@@ -1,6 +1,5 @@
-﻿namespace UP.Api.Models
+namespace UP.Api.Models;
+
+public class Excursion : Product
 {
-    public class Excursion : Product
-    {
-    }
 }

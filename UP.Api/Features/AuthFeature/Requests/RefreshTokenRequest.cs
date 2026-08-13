@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace UP.Api.Features.AuthFeature.Requests
+namespace UP.Api.Features.AuthFeature.Requests;
+
+public class RefreshTokenRequest
 {
-    public class RefreshTokenRequest
-    {
-        [Required]
-        [EmailAddress]
-        public required string Email { get; set; }
-        [Required]
-        public required string RefreshToken { get; set; }
-    }
+    [Required]
+    [EmailAddress]
+    public required string Email { get; set; }
+    [Required]
+    public required string RefreshToken { get; set; }
 }

@@ -1,8 +1,7 @@
-﻿namespace UP.Api.Features.AuthFeature.Responses
+namespace UP.Api.Features.AuthFeature.Responses;
+
+public class LoginResponse
 {
-    public class LoginResponse
-    {
-        public required string AccessToken { get; set; }
-        public required string RefreshToken { get; set; }
-    }
+    public required string AccessToken { get; set; }
+    public required string RefreshToken { get; set; }
 }

@@ -1,7 +1,6 @@
-﻿namespace UP.Api.Models
+namespace UP.Api.Models;
+
+public class Order
 {
-    public class Order
-    {
-        public int Id { get; set; }
-    }
+    public int Id { get; set; }
 }

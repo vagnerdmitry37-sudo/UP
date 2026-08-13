@@ -1,33 +1,32 @@
-﻿namespace UP.Api.Features.AppErrorFeature
-{
-    public class AppErrorMiddleware(RequestDelegate next)
-    {
-        private readonly RequestDelegate _next = next;
+namespace UP.Api.Features.AppErrorFeature;
 
-        public async Task Invoke(HttpContext context)
+public class AppErrorMiddleware(RequestDelegate next)
+{
+    private readonly RequestDelegate _next = next;
+
+    public async Task Invoke(HttpContext context)
+    {
+        try
         {
-            try
+            await _next(context);
+        }
+        catch (AppError ex)
+        {
+            context.Response.StatusCode = ex.StatusCode;
+            await context.Response.WriteAsJsonAsync(new AppErrorResponses
             {
-                await _next(context);
-            }
-            catch (AppError ex)
+                Message = ex.Message,
+                StatusCode = ex.StatusCode
+            });
+        }
+        catch (Exception ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(new AppErrorResponses
             {
-                context.Response.StatusCode = ex.StatusCode;
-                await context.Response.WriteAsJsonAsync(new AppErrorResponses
-                {
-                    Message = ex.Message,
-                    StatusCode = ex.StatusCode
-                });
-            }
-            catch (Exception ex)
-            {
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await context.Response.WriteAsJsonAsync(new AppErrorResponses
-                {
-                    Message = ex.Message,
-                    StatusCode = StatusCodes.Status500InternalServerError
-                });
-            }
+                Message = ex.Message,
+                StatusCode = StatusCodes.Status500InternalServerError
+            });
         }
     }
 }
