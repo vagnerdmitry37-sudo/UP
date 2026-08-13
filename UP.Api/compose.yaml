@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: UP.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Jwt__Key: "4A8E7D3C91F2B6A5E8C1D9F4A7B2C6E9F1A3D5B7C8E2F4A6G9H1J3K5L7M9N2P"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=UpDb;Username=postgres;Password=postgres"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: UpDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d UpDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
