@@ -25,10 +25,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore UP.sln
+        run: dotnet restore UP.Api/UP.Api.csproj
 
       - name: Build
-        run: dotnet build UP.sln --no-restore --configuration Release
+        run: dotnet build UP.Api/UP.Api.csproj --no-restore --configuration Release
 
       - name: Run tests
         run: dotnet test UP.IntegrationTests/UP.IntegrationTests.csproj --no-build --configuration Release
