@@ -28,4 +28,4 @@ jobs:
         run: dotnet restore UP.Api/UP.Api.csproj
 
       - name: Run integration tests
-        run: dotnet test UP.IntegrationTests/UP.IntegrationTests.csproj --no-build --configuration Release --verbosity normal
+        run: dotnet test UP.IntegrationTests/UP.IntegrationTests.csproj
