@@ -12,7 +12,7 @@ on:
       - develop
 
 jobs:
-  build-UP.Api:
+  check-UP.Api:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,6 @@ jobs:
 
       - name: Restore
         run: dotnet restore UP.Api/UP.Api.csproj
-
-  run-integration-tests:
+        
       - name: Run tests
         run: dotnet test UP.IntegrationTests/UP.IntegrationTests.csproj --no-build --configuration Release
