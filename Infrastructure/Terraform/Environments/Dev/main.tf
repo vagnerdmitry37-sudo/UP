@@ -5,6 +5,13 @@ terraform {
       version = "~> 6.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "up-app-terraform-state"
+    key          = "environments/dev/terraform.tfstate"
+    region       = "eu-central-1"
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
