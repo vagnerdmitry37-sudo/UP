@@ -69,7 +69,9 @@ resource "aws_instance" "dev" {
 
   key_name = var.key_name
 
-  user_data = file("${path.module}/user_data.sh")
+  user_data = file("${path.module}/user_data.sh") {
+    docker_compose = file("${path.module}/compose.yaml")
+  }
 
   tags = {
     Name        = "up-dev"

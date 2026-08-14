@@ -11,3 +11,11 @@ systemctl start docker
 usermod -aG docker ubuntu
 
 mkdir -p /opt/up
+
+cat > /opt/up/docker-compose.yml <<'EOF'
+${docker_compose}
+EOF
+
+cd /opt/up
+
+docker compose up -d
