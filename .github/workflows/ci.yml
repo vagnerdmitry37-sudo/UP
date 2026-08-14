@@ -71,17 +71,20 @@ jobs:
     # needs: Build
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: Terraform
+        working-directory: Infrastructure/Terraform/Environments/Dev
         run: terraform init
 
       - name: Terraform Plan
-        working-directory: Terraform
+        working-directory: Infrastructure/Terraform/Environments/Dev
         run: terraform plan
 
       - name: Terraform Apply
-        working-directory: Terraform
+        working-directory: Infrastructure/Terraform/Environments/Dev
         run: terraform apply -auto-approve
