@@ -4,9 +4,9 @@ WORKDIR /src
 
 COPY . .
 
-RUN dotnet restore UP.Api.csproj --verbosity normal
+RUN dotnet restore UP.Api/UP.Api.csproj --verbosity normal
 
-RUN dotnet publish UP.Api.csproj \
+RUN dotnet publish UP.Api/UP.Api.csproj \
     --configuration Release \
     --output /app/publish \
     --no-restore
