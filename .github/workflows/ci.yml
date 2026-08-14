@@ -83,6 +83,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::558613451057:role/GitActions
           aws-region: eu-central-1
+          retry-max-attempts: 1
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
