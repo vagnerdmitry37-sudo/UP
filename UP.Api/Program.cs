@@ -56,14 +56,18 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<AppErrorMiddleware>();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseMiddleware<AppErrorMiddleware>();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.Run();
-
-public partial class Program { }
