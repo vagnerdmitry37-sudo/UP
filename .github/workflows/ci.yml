@@ -55,6 +55,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
+            -f UP.Api/Dockerfile \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/up-api:${{ github.sha }} \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/up-api:latest \
             .
