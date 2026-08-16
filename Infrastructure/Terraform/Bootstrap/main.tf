@@ -99,7 +99,8 @@ resource "aws_iam_policy" "github_actions_s3_upload" {
                 "ec2:DescribeInstanceTypes",
                 "ec2:DescribeInstanceAttribute",
                 "ec2:DescribeVolumes",
-                "ec2:DescribeInstanceCreditSpecifications"
+                "ec2:DescribeInstanceCreditSpecifications",
+                "ec2:ModifyInstanceAttribute"
             ]
 
             Resource = "*"
