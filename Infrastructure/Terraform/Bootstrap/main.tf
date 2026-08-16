@@ -42,26 +42,37 @@ resource "aws_iam_role" "github_actions" {
 
 resource "aws_iam_policy" "github_actions_s3_upload" {
   name        = "GitHubActionsS3UploadPolicy"
-  description = "Allows GitHub Actions to upload files to S3"
 
   policy = jsonencode({
     Version = "2012-10-17"
 
     Statement = [
-      {
-        Effect = "Allow"
+        {
+            Effect = "Allow"
 
-        Action = [
-          "s3:PutObject",
-          "s3:GetObject",
-          "s3:ListBucket"
-        ]
+            Action = [
+            "s3:PutObject",
+            "s3:GetObject",
+            "s3:ListBucket"
+            ]
 
-        Resource = [
-          "arn:aws:s3:::up-app-terraform-state",
-          "arn:aws:s3:::up-app-terraform-state/*"
-        ]
-      }
+            Resource = [
+            "arn:aws:s3:::up-app-terraform-state",
+            "arn:aws:s3:::up-app-terraform-state/*"
+            ]
+        },
+        {
+            Effect = "Allow"
+
+            Action = [
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeImages",
+                "ec2:DescribeSecurityGroups"
+            ]
+
+            Resource = "*"
+        }
     ]
   })
 }
