@@ -21,8 +21,8 @@ if [ ! -f /opt/up/.env ]; then
 
     cat > /opt/up/.env <<EOF
 ASPNETCORE_ENVIRONMENT=Production
-POSTGRES_PASSWORD=$(openssl rand -base64 32)
-JWT_KEY=$(openssl rand -base64 64)
+POSTGRES_PASSWORD=$(openssl rand -hex 32)
+JWT_KEY=$(openssl rand -hex 64)
 EOF
 
     chmod 600 /opt/up/.env
