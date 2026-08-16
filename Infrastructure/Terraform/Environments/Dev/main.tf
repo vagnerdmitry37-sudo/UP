@@ -73,6 +73,8 @@ resource "aws_instance" "dev" {
     docker_compose = file("${path.module}/compose.yaml")
   })
 
+  user_data_replace_on_change = true
+
   tags = {
     Name        = "up-dev"
     Environment = "dev"

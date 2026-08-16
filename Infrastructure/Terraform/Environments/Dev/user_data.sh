@@ -16,15 +16,19 @@ cat > /opt/up/docker-compose.yml <<'EOF'
 ${docker_compose}
 EOF
 
-rm -f /opt/up/.env
+if [ ! -f /opt/up/.env ]; then
+    echo "Creating initial environment..."
 
-cat > /opt/up/.env <<EOF
+    cat > /opt/up/.env <<EOF
 ASPNETCORE_ENVIRONMENT=Production
 POSTGRES_PASSWORD=$(openssl rand -base64 32)
 JWT_KEY=$(openssl rand -base64 64)
 EOF
 
-chmod 600 /opt/up/.env
+    chmod 600 /opt/up/.env
+else
+    echo "Using existing /opt/up/.env"
+fi
 
 cd /opt/up
 
