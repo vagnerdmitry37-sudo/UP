@@ -107,6 +107,16 @@ jobs:
         working-directory: Infrastructure/Terraform/Environments/Dev
         run: terraform init
 
+      - name: Debug Terraform files
+        working-directory: Infrastructure/Terraform/Environments/Dev
+        run: |
+          pwd
+          echo "Files:"
+          ls -la
+
+          echo "terraform.tfvars:"
+          cat terraform.tfvars
+
       - name: Terraform Plan
         working-directory: Infrastructure/Terraform/Environments/Dev
         run: terraform plan

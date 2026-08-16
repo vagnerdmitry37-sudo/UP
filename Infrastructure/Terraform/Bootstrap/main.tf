@@ -32,7 +32,7 @@ resource "aws_iam_role" "github_actions" {
             }
 
             StringLike = {
-                "token.actions.githubusercontent.com:sub" = "repo:vagnerdmitry37-sudo/UP:*"
+                "token.actions.githubusercontent.com:sub" = "repo:vagnerdmitry37-sudo@270916703/UP@1325405089:environment:Dev"
             }
             }
       }
