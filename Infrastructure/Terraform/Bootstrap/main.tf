@@ -34,7 +34,7 @@ resource "aws_iam_role" "github_actions" {
             StringLike = {
                 "token.actions.githubusercontent.com:sub" = "repo:vagnerdmitry37-sudo@270916703/UP@1325405089:environment:Dev"
             }
-            }
+        }
       }
     ]
   })
@@ -77,10 +77,29 @@ resource "aws_iam_policy" "github_actions_s3_upload" {
             Effect = "Allow"
 
             Action = [
+                "ec2:CreateTags",
+                "ec2:RunInstances",
+                "ec2:TerminateInstances",
+                "ec2:StopInstances",
+                "ec2:StartInstances",
                 "ec2:DescribeVpcs",
+                "ec2:DescribeVpcAttribute",
                 "ec2:DescribeSubnets",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeInstances",
                 "ec2:DescribeImages",
-                "ec2:DescribeSecurityGroups"
+                "ec2:DescribeTags",
+                "ec2:DescribeKeyPairs",
+                "ec2:CreateSecurityGroup",
+                "ec2:DeleteSecurityGroup",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:DescribeInstanceTypes",
+                "ec2:DescribeInstanceAttribute",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeInstanceCreditSpecifications"
             ]
 
             Resource = "*"

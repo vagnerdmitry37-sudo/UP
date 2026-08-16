@@ -18,4 +18,4 @@ EOF
 
 cd /opt/up
 
-docker compose up -d
+docker docker-compose up -d
