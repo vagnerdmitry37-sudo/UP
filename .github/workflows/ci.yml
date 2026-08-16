@@ -40,7 +40,7 @@ jobs:
   #     - name: Run tests
   #       run: dotnet test UP.IntegrationTests/UP.IntegrationTests.csproj
   
-  Build:
+  # Build:
     # runs-on: ubuntu-latest
     # environment: Dev
 
