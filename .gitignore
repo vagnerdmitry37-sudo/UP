@@ -363,7 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .env
-terraform.tfvars
 .terraform
 .terraform.lock.hcl
 terraform.tfstate
