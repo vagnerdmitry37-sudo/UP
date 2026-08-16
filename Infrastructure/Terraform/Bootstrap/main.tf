@@ -51,14 +51,26 @@ resource "aws_iam_policy" "github_actions_s3_upload" {
             Effect = "Allow"
 
             Action = [
-            "s3:PutObject",
-            "s3:GetObject",
-            "s3:ListBucket"
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket"
             ]
 
             Resource = [
-            "arn:aws:s3:::up-app-terraform-state",
-            "arn:aws:s3:::up-app-terraform-state/*"
+                "arn:aws:s3:::up-app-terraform-state",
+                "arn:aws:s3:::up-app-terraform-state/*"
+            ]
+        },
+        {
+            Effect = "Allow"
+
+            Action = [
+                "s3:DeleteObject"
+            ]
+
+            Resource = [
+                "arn:aws:s3:::up-app-terraform-state/environments/dev/terraform.tfstate.tflock",
+                "arn:aws:s3:::up-app-terraform-state/environments/dev/terraform.tfstate"
             ]
         },
         {
