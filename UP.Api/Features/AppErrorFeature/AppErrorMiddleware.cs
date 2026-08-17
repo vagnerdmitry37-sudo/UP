@@ -15,7 +15,7 @@ public class AppErrorMiddleware(RequestDelegate next)
             context.Response.StatusCode = ex.StatusCode;
             await context.Response.WriteAsJsonAsync(new AppErrorResponses
             {
-                Message = "Hello Dima Vagner",
+                Message = ex.Message,
                 StatusCode = ex.StatusCode
             });
         }

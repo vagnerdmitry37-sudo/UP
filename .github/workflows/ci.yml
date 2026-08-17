@@ -60,14 +60,12 @@ jobs:
         run: |
           docker build \
             -f UP.Api/Dockerfile \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/up-api:${{ github.sha }} \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/up-api:latest \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/up.api:latest \
             .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/up-api:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/up-api:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/up.api:latest
 
   Deploy:
     runs-on: ubuntu-latest
