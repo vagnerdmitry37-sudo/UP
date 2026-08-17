@@ -102,11 +102,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: Infrastructure/Terraform/Environments/Dev
+        working-directory: UP.Infrastructure/Terraform/Environments/Dev
         run: terraform init
 
       - name: Debug Terraform files
-        working-directory: Infrastructure/Terraform/Environments/Dev
+        working-directory: UP.Infrastructure/Terraform/Environments/Dev
         run: |
           pwd
           echo "Files:"
@@ -116,9 +116,9 @@ jobs:
           cat terraform.tfvars
 
       - name: Terraform Plan
-        working-directory: Infrastructure/Terraform/Environments/Dev
+        working-directory: UP.Infrastructure/Terraform/Environments/Dev
         run: terraform plan
 
       - name: Terraform Apply
-        working-directory: Infrastructure/Terraform/Environments/Dev
+        working-directory: UP.Infrastructure/Terraform/Environments/Dev
         run: terraform apply -auto-approve
