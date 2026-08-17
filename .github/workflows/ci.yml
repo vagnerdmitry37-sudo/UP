@@ -153,3 +153,22 @@ jobs:
 
           echo "API did not become ready after 5 minutes."
           exit 1
+
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo ""
+          echo "========================================"
+          echo "          DEPLOYMENT SUCCESSFUL"
+          echo "========================================"
+          echo ""
+          echo "Environment: Dev"
+          echo "Commit:      $GITHUB_SHA"
+          echo ""
+          echo "API:"
+          echo "http://$PUBLIC_IP:8080"
+          echo ""
+          echo "Health:"
+          echo "$API_URL"
+          echo ""
+          echo "========================================"
