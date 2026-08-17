@@ -65,6 +65,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
 app.UseCors("DevelopmentCors");
 
 app.UseHttpsRedirection();

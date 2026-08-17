@@ -1,3 +1,7 @@
+env:
+  TERRAFORM_DIR: UP.Infrastructure/Terraform/Environments/Dev
+  UP_API_IMAGE_ADDRESS: ${{ secrets.DOCKERHUB_USERNAME }}/up.api:${{github.sha}}
+
 name: CI
 
 on:
@@ -43,7 +47,6 @@ jobs:
   Build:
     runs-on: ubuntu-latest
     environment: Dev
-
     # needs: Integration-tests
 
     steps:
@@ -60,12 +63,12 @@ jobs:
         run: |
           docker build \
             -f UP.Api/Dockerfile \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/up.api:latest \
+            -t "$UP_API_IMAGE_ADDRESS" \
             .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/up.api:latest
+          docker push "$UP_API_IMAGE_ADDRESS"
 
   Deploy:
     runs-on: ubuntu-latest
@@ -102,11 +105,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: UP.Infrastructure/Terraform/Environments/Dev
+        working-directory: ${{ env.TERRAFORM_DIR }}
         run: terraform init
 
       - name: Debug Terraform files
-        working-directory: UP.Infrastructure/Terraform/Environments/Dev
+        working-directory: ${{ env.TERRAFORM_DIR }}
         run: |
           pwd
           echo "Files:"
@@ -116,9 +119,37 @@ jobs:
           cat terraform.tfvars
 
       - name: Terraform Plan
-        working-directory: UP.Infrastructure/Terraform/Environments/Dev
-        run: terraform plan
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform plan \
+            -var="up_api_image_address=$UP_API_IMAGE_ADDRESS"
 
       - name: Terraform Apply
-        working-directory: UP.Infrastructure/Terraform/Environments/Dev
-        run: terraform apply -auto-approve
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          terraform apply \
+            -auto-approve \
+            -var="up_api_image_address=$UP_API_IMAGE_ADDRESS"
+
+      - name: Get API URL
+        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: |
+          echo "API_URL=http://$(terraform output -raw public_ip):8080/health" >> "$GITHUB_ENV"
+
+      - name: Wait for API
+        run: |
+          echo "Waiting for API at $API_URL..."
+
+          for i in {1..30}; do
+            if curl --fail --silent --show-error "$API_URL"; then
+              echo ""
+              echo "API is ready!"
+              exit 0
+            fi
+
+            echo "API is not ready yet. Attempt $i/30..."
+            sleep 10
+          done
+
+          echo "API did not become ready after 5 minutes."
+          exit 1

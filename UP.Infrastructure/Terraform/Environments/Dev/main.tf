@@ -71,6 +71,7 @@ resource "aws_instance" "dev" {
 
   user_data = templatefile("${path.module}/user_data.sh", {
     docker_compose = file("${path.module}/compose.yaml")
+    up_api_image_address = var.up_api_image_address
   })
 
   user_data_replace_on_change = true

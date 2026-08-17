@@ -1,6 +1,6 @@
 services:
   api:
-    image: vagner8/up.api:latest
+    image: ${UP_API_IMAGE_ADDRESS}
     ports:
       - "8080:8080"
     environment:

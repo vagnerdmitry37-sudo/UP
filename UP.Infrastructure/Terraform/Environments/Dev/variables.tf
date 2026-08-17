@@ -15,3 +15,8 @@ variable "instance_type" {
 variable "key_name" {
   type = string
 }
+
+variable "up_api_image_address" {
+  description = "Docker image to deploy"
+  type        = string
+}

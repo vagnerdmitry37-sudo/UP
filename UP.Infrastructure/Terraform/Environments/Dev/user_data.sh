@@ -23,6 +23,7 @@ if [ ! -f /opt/up/.env ]; then
 ASPNETCORE_ENVIRONMENT=Production
 POSTGRES_PASSWORD=$(openssl rand -hex 32)
 JWT_KEY=$(openssl rand -hex 64)
+UP_API_IMAGE_ADDRESS=${up_api_image_address}
 EOF
 
     chmod 600 /opt/up/.env
