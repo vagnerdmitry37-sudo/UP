@@ -12,8 +12,8 @@ using UP.Api.Db;
 namespace UP.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260809135628_AddIsActiveToRefreshToken")]
-    partial class AddIsActiveToRefreshToken
+    [Migration("20260821091418_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -286,7 +286,7 @@ namespace UP.Api.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("UP.Api.Features.CollectionFeature.Collection", b =>
+            modelBuilder.Entity("UP.Api.Features.CollectionFeature.Models.Collection", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -294,8 +294,9 @@ namespace UP.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("EntityType")
-                        .HasColumnType("integer");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("SortedBy")
                         .IsRequired()
@@ -304,6 +305,44 @@ namespace UP.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Collections");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Transfers",
+                            SortedBy = "Name"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Excursions",
+                            SortedBy = "Name"
+                        });
+                });
+
+            modelBuilder.Entity("UP.Api.Models.Excursion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PriceInCents")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Excursions");
                 });
 
             modelBuilder.Entity("UP.Api.Models.Order", b =>
@@ -319,7 +358,7 @@ namespace UP.Api.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("UP.Api.Models.Product", b =>
+            modelBuilder.Entity("UP.Api.Models.Transfer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -331,11 +370,6 @@ namespace UP.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -345,25 +379,7 @@ namespace UP.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Product");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("UP.Api.Models.Excursion", b =>
-                {
-                    b.HasBaseType("UP.Api.Models.Product");
-
-                    b.HasDiscriminator().HasValue("Excursion");
-                });
-
-            modelBuilder.Entity("UP.Api.Models.Transfer", b =>
-                {
-                    b.HasBaseType("UP.Api.Models.Product");
-
-                    b.HasDiscriminator().HasValue("Transfer");
+                    b.ToTable("Transfers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
