@@ -6,6 +6,7 @@ using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Models;
 using UP.Api.Features.AuthFeature.Services;
+using UP.Api.Features.BootstrapFeatuer;
 using UP.Api.Features.UserFeature;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,16 +53,13 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("DevelopmentCors", policy =>
+builder.Services.AddCors(options => options.AddPolicy("DevelopmentCors", policy =>
     {
         policy
             .WithOrigins("http://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod();
-    });
-});
+    }));
 
 var app = builder.Build();
 
@@ -79,10 +77,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-}
+await Bootstrap.RunAsync(app.Services);
 
 app.Run();
