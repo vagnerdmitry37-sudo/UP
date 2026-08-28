@@ -2,7 +2,4 @@ using Microsoft.AspNetCore.Identity;
 
 namespace UP.Api.Features.AuthFeature.Models;
 
-public class AuthUser : IdentityUser<int>
-{
-    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
-}
+public class AuthUser : IdentityUser<int> { }

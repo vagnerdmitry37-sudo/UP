@@ -1,7 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using UP.Api.Features.AuthFeature;
+using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Requests;
 using UP.Api.Features.AuthFeature.Services;
 
@@ -10,26 +11,41 @@ public class AuthController(IAuthService aus) : ControllerBase
 {
     private readonly IAuthService _aus = aus;
 
+    [HttpPost(AuthRouts.Me)]
+    public async Task<IActionResult> Me()
+    {
+        await _aus.MeAsync();
+
+        return Ok();
+    }
+
     [HttpPost(AuthRouts.Register)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        await _aus.Register(request);
+        await _aus.RegisterAsync(request);
         return Created();
     }
 
     [AllowAnonymous]
     [HttpPost(AuthRouts.Login)]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> LoginAsync(LoginRequest request)
     {
-        var result = await _aus.Login(request);
-        return Ok(result);
+        await _aus.LoginAsync(request);
+        return Ok();
+    }
+
+    [HttpPost(AuthRouts.Logout)]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        await _aus.LogoutAsync();
+        return Ok();
     }
 
     [AllowAnonymous]
     [HttpPost(AuthRouts.Refresh)]
-    public async Task<IActionResult> Refresh(RefreshTokenRequest request)
+    public async Task<IActionResult> RefreshAsync()
     {
-        var result = await _aus.Refresh(request);
-        return Ok(result);
+        await _aus.RefreshAsync();
+        return Ok();
     }
 }

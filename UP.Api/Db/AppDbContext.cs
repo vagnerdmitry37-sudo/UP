@@ -1,4 +1,3 @@
-using Mapster.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +22,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     {
         base.OnModelCreating(builder);
 
+        SetData(builder);
+    }
+
+    private static void SetData(ModelBuilder builder)
+    {
         ICollection<EntityType> collectionNames = [EntityType.Transfers, EntityType.Excursions];
         var collections = collectionNames.Select((n, i) => new Collection
         {

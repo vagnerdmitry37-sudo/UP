@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity.Data;
-using UP.Api.Features.AuthFeature;
+using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Requests;
 using UP.Api.Features.AuthFeature.Responses;
 using UP.IntegrationTests.Fixtures;
@@ -39,7 +39,7 @@ public class AuthFeatureTests(ShareFixture sf) : IClassFixture<ShareFixture>
         var loginHttpResponse = await sf.Client.PostAsJsonAsync(AuthRouts.Login, loginRequest);
         loginHttpResponse.EnsureSuccessStatusCode();
 
-        var loginResponse = await loginHttpResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResponse = await loginHttpResponse.Content.ReadFromJsonAsync<AuthResponse>();
         loginResponse!.AccessToken.Should().NotBeNullOrEmpty();
         loginResponse!.RefreshToken.Should().NotBeNullOrEmpty();
     }
@@ -61,7 +61,7 @@ public class AuthFeatureTests(ShareFixture sf) : IClassFixture<ShareFixture>
 
         await sf.Auth.CreateAuthUserAsync(registerRequest);
         var loginHttpResponse = await sf.Client.PostAsJsonAsync(AuthRouts.Login, loginRequest);
-        var loginResponse = await loginHttpResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResponse = await loginHttpResponse.Content.ReadFromJsonAsync<AuthResponse>();
 
         var refreshTokenRequest = new RefreshTokenRequest
         {
@@ -70,7 +70,7 @@ public class AuthFeatureTests(ShareFixture sf) : IClassFixture<ShareFixture>
         };
 
         var refreshHttpResponse = await sf.Client.PostAsJsonAsync(AuthRouts.Refresh, refreshTokenRequest);
-        var refreshResponse = await refreshHttpResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var refreshResponse = await refreshHttpResponse.Content.ReadFromJsonAsync<AuthResponse>();
         var existedRefreshToken = await sf.Auth.FindRefreshTokenByValueAsync(loginResponse!.RefreshToken);
         refreshResponse!.AccessToken.Should().NotBeNullOrEmpty();
         refreshResponse!.RefreshToken.Should().NotBeNullOrEmpty();

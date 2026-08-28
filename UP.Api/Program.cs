@@ -1,71 +1,25 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
-using UP.Api.Features.AuditLogFeature;
-using UP.Api.Features.AuthFeature.Models;
-using UP.Api.Features.AuthFeature.Services;
 using UP.Api.Features.BootstrapFeatuer;
-using UP.Api.Features.UserFeature;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+var bootstap = new Bootstrap(builder);
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(
-    builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+bootstap.AddDbContext();
+bootstap.AddScoped();
+bootstap.AddIdentityCore();
+bootstap.AddJwtBearer();
+var corsMode = bootstap.AddCors();
 
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-builder.Services.AddScoped<IAudiLogRepository, AudiLogRepository>();
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-
-
-builder.Services.AddIdentityCore<AuthUser>(options =>
-{
-    options.Password.RequiredLength = 8;
-    options.Password.RequireDigit = true;
-    options.Password.RequireUppercase = true;
-
-    options.User.RequireUniqueEmail = true;
-
-    options.Lockout.MaxFailedAccessAttempts = 5;
-})
-.AddRoles<IdentityRole<int>>()
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = AccessTokenService.GetTokenValidationParameters(builder.Configuration);
-    });
-
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
-});
-
-builder.Services.AddCors(options => options.AddPolicy("DevelopmentCors", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:4200")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    }));
+builder.Services.AddControllers(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter()));
 
 var app = builder.Build();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
-app.UseCors("DevelopmentCors");
+app.UseCors(corsMode);
 
 app.UseHttpsRedirection();
 
@@ -77,6 +31,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await Bootstrap.RunAsync(app.Services);
+await bootstap.RunAsync(app.Services);
 
 app.Run();

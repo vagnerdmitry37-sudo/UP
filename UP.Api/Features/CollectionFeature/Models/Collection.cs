@@ -1,5 +1,3 @@
-using UP.Api.Enums;
-
 namespace UP.Api.Features.CollectionFeature.Models;
 
 public class Collection

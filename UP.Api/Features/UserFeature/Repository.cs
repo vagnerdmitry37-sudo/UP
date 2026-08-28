@@ -1,4 +1,5 @@
 using UP.Api.Db;
+using UP.Api.Features.UserFeature.Models;
 
 namespace UP.Api.Features.UserFeature;
 

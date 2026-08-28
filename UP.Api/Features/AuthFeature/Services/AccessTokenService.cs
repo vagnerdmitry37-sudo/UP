@@ -15,7 +15,6 @@ public interface IAccessTokenService
 public class AccessTokenService(IConfiguration config) : IAccessTokenService
 {
     private readonly IConfiguration _config = config;
-    private readonly int _accessTokeExpiresSeconds = 600;
 
     public string GenerateToken(AuthUser authUser)
     {
@@ -32,7 +31,7 @@ public class AccessTokenService(IConfiguration config) : IAccessTokenService
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddSeconds(_accessTokeExpiresSeconds),
+            expires: DateTime.UtcNow.AddSeconds(15),
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -48,7 +47,8 @@ public class AccessTokenService(IConfiguration config) : IAccessTokenService
             ValidAudience = config["Jwt:Audience"],
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!)),
-            ValidateLifetime = true
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
     }
 }

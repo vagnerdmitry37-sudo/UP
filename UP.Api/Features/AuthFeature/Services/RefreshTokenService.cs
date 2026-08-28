@@ -7,7 +7,7 @@ namespace UP.Api.Features.AuthFeature.Services;
 
 public interface IRefreshTokenService
 {
-    RefreshToken GenerateToken();
+    RefreshToken GenerateToken(int authUserId);
     Task RevokeOldTokensAsync(int authUserId);
 }
 
@@ -30,13 +30,14 @@ public class RefreshTokenService(AppDbContext context) : IRefreshTokenService
         }
     }
 
-    public RefreshToken GenerateToken()
+    public RefreshToken GenerateToken(int authUserId)
     {
         return new RefreshToken
         {
             Value = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(30)
+            ExpiresAt = DateTime.UtcNow.AddDays(30),
+            AuthUserId = authUserId
         };
     }
 }
