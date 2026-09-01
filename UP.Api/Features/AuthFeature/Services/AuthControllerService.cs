@@ -19,12 +19,14 @@ public class AuthControllerService(
     ITokenService ts,
     IAuthRepository ar,
     IDbContextService dbcs,
-    IHttpContextService hcs) : IAuthControllerService
+    IHttpContextService hcs,
+    ITokenCookiesService tcs) : IAuthControllerService
 {
     private readonly ITokenService _ts = ts;
     private readonly IAuthRepository _ar = ar;
     private readonly IDbContextService _dbcs = dbcs;
     private readonly IHttpContextService _hcs = hcs;
+    private readonly ITokenCookiesService _tcs = tcs;
 
     public async Task MeAsync() => await _ar.FindAuthUserByIdAsync(_hcs.GetCurrentAuthUserId());
 
@@ -57,9 +59,7 @@ public class AuthControllerService(
         var authUser = await ValidateAuthUserAsync(request)
             ?? throw new AuthError("Invalid user");
         await _ts.MarkCurrentRefreshTokenAsRevokedAsync();
-        var newRefreshToken = _ts.RestoreTokens(authUser);
-        authUser.RefreshTokens.Add(newRefreshToken);
-        await _ar.UpdateAuthUserAsync(authUser);
+        await RestoreTokens(authUser);
     }
 
     public async Task RefreshAsync()
@@ -69,16 +69,23 @@ public class AuthControllerService(
         validRefreshToken.RevokedAt = DateTimeOffset.UtcNow;
         var authUser = validRefreshToken.AuthUser;
         _ts.MarkExcessRefreshTokensAsRevoked(validRefreshToken.AuthUser);
-        var newRefreshToken = _ts.RestoreTokens(authUser);
-        authUser.RefreshTokens.Add(newRefreshToken);
-        await _ar.UpdateAuthUserAsync(authUser);
+        await RestoreTokens(authUser);
     }
 
     public async Task LogoutAsync()
     {
-        _ts.DeleteTokensFromResponseCookie();
+        _tcs.DeleteTokensCookies();
         await _ts.MarkCurrentRefreshTokenAsRevokedAsync();
         await _dbcs.SaveChangesAsync();
+    }
+
+    private async Task RestoreTokens(AuthUser authUser)
+    {
+        var accessToken = _ts.GenerateAccessToken(authUser);
+        var (refreshTokenValue, refreshToken) = _ts.GenerateRefreshToken(authUser.Id);
+        _tcs.SetTokenCookies(accessToken, refreshTokenValue);
+        authUser.RefreshTokens.Add(refreshToken);
+        await _ar.UpdateAuthUserAsync(authUser);
     }
 
     private async Task<AuthUser?> ValidateAuthUserAsync(LoginRequest request)

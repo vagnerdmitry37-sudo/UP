@@ -36,8 +36,9 @@ public class Bootstrap(WebApplicationBuilder builder)
         builder.Services.AddScoped<IAudiLogRepository, AudiLogRepository>();
 
         // Auth feature
-        builder.Services.AddScoped<IAuthControllerService, AuthControllerService>();
         builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.AddScoped<ITokenCookiesService, TokenCookiesService>();
+        builder.Services.AddScoped<IAuthControllerService, AuthControllerService>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
     }
 

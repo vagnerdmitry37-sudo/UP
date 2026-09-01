@@ -3,7 +3,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models;
@@ -14,11 +13,9 @@ namespace UP.Api.Features.AuthFeature.Services;
 
 public interface ITokenService
 {
-    RefreshToken RestoreTokens(AuthUser authUser);
     string GenerateAccessToken(AuthUser authUser);
     (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId);
     Task<RefreshToken?> ValidateRefreshToken();
-    void DeleteTokensFromResponseCookie();
     void MarkExcessRefreshTokensAsRevoked(AuthUser authUser);
     Task MarkCurrentRefreshTokenAsRevokedAsync();
 }
@@ -31,24 +28,6 @@ public class TokenService(
     private readonly IAuthRepository _ar = ar;
     private readonly IHttpContextService _hcs = hcs;
     private readonly IConfiguration _config = config;
-
-    private readonly CookieOptions _accessTokenCookieOptions = new()
-    {
-        HttpOnly = true,
-        Secure = true,
-        SameSite = SameSiteMode.None,
-        Path = "/",
-        Expires = DateTimeOffset.UtcNow.AddSeconds(AuthConstants.AccessTokenLifetimeSeconds),
-    };
-
-    private readonly CookieOptions _refreshTokenCookieOptions = new()
-    {
-        HttpOnly = true,
-        Secure = true,
-        SameSite = SameSiteMode.None,
-        Path = "/api/auth",
-        Expires = DateTimeOffset.UtcNow.AddSeconds(AuthConstants.RefreshTokenLifetimeSeconds),
-    };
 
     public string GenerateAccessToken(AuthUser authUser)
     {
@@ -90,13 +69,7 @@ public class TokenService(
 
     public async Task<RefreshToken?> ValidateRefreshToken()
     {
-        var refreshTokenValue = _hcs.FindRequestCookie(TokenNames.RefreshToken);
-        if (refreshTokenValue is null)
-        {
-            return null;
-        }
-        var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
-        var refreshToken = await _ar.FindRefreshTokenByValueAsync(tokenHash);
+        var refreshToken = await FindRefreshTokenByValueAsync();
 
         if (refreshToken is null || !refreshToken.IsActive)
         {
@@ -122,28 +95,21 @@ public class TokenService(
 
     public async Task MarkCurrentRefreshTokenAsRevokedAsync()
     {
-        var refreshTokenFromCookies = _hcs.FindRequestCookie(TokenNames.RefreshToken);
-        if (refreshTokenFromCookies is not null)
+        var refreshToken = await FindRefreshTokenByValueAsync();
+        if (refreshToken is not null && refreshToken.IsActive)
         {
-            var refreshToken = await _ar.FindRefreshTokenByValueAsync(refreshTokenFromCookies);
-            if (refreshToken is not null && refreshToken.IsActive)
-            {
-                refreshToken.RevokedAt = DateTimeOffset.UtcNow;
-            }
+            refreshToken.RevokedAt = DateTimeOffset.UtcNow;
         }
     }
 
-    public RefreshToken RestoreTokens(AuthUser authUser)
+    private async Task<RefreshToken?> FindRefreshTokenByValueAsync()
     {
-        var (refreshTokenValue, newRefreshtoken) = GenerateRefreshToken(authUser.Id);
-        _hcs.AppendResponseCookie(TokenNames.AccessToken, GenerateAccessToken(authUser), _accessTokenCookieOptions);
-        _hcs.AppendResponseCookie(TokenNames.RefreshToken, refreshTokenValue, _refreshTokenCookieOptions);
-        return newRefreshtoken;
-    }
-
-    public void DeleteTokensFromResponseCookie()
-    {
-        _hcs.DeleteResponseCookie(TokenNames.AccessToken, _accessTokenCookieOptions);
-        _hcs.DeleteResponseCookie(TokenNames.RefreshToken, _refreshTokenCookieOptions);
+        var refreshTokenValue = _hcs.FindRequestCookie(TokenNames.RefreshToken);
+        if (refreshTokenValue is null)
+        {
+            return null;
+        }
+        var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
+        return await _ar.FindRefreshTokenByValueAsync(tokenHash);
     }
 }
