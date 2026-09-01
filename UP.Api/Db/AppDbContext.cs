@@ -22,6 +22,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<AuthUser>()
+            .HasMany(u => u.RefreshTokens)
+            .WithOne(t => t.AuthUser)
+            .OnDelete(DeleteBehavior.Cascade);
+
         SetData(builder);
     }
 

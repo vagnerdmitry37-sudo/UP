@@ -1,11 +1,13 @@
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.BootstrapFeatuer;
+using UP.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var bootstap = new Bootstrap(builder);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHostedService<AppBackgroundService>();
 
 bootstap.AddDbContext();
 bootstap.AddScoped();

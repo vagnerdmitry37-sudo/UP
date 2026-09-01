@@ -12,7 +12,7 @@ using UP.Api.Db;
 namespace UP.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260821091418_Init")]
+    [Migration("20260829162810_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -266,16 +266,16 @@ namespace UP.Api.Migrations
                     b.Property<int>("AuthUserId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset>("ExpiresAt")
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset?>("RevokedAt")
+                    b.Property<DateTime?>("RevokedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Value")
+                    b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasColumnType("text");
 

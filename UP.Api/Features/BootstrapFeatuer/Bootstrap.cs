@@ -1,15 +1,17 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
+using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Services;
 using UP.Api.Features.UserFeature;
 using UP.Api.Services;
-using UP.Api.Features.AuthFeature.Constants;
 
 namespace UP.Api.Features.BootstrapFeatuer;
 
@@ -22,7 +24,8 @@ public class Bootstrap(WebApplicationBuilder builder)
 {
     public void AddScoped()
     {
-        builder.Services.AddScoped<IUnitOfWorkService, UnitOfWorkService>();
+        builder.Services.AddScoped<IDbContextService, DbContextService>();
+        builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 
         // User feature
         builder.Services.AddScoped<IUserService, UserService>();
@@ -33,12 +36,9 @@ public class Bootstrap(WebApplicationBuilder builder)
         builder.Services.AddScoped<IAudiLogRepository, AudiLogRepository>();
 
         // Auth feature
-        builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
-        builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-
-        builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
-        builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        builder.Services.AddScoped<IAuthControllerService, AuthControllerService>();
+        builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.AddScoped<IAuthRepository, AuthRepository>();
     }
 
     public string AddCors()
@@ -76,7 +76,17 @@ public class Bootstrap(WebApplicationBuilder builder)
     {
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = AccessTokenService.GetTokenValidationParameters(builder.Configuration);
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
 
         options.Events = new JwtBearerEvents
         {
