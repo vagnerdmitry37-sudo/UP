@@ -8,8 +8,10 @@ using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Services;
+using UP.Api.Features.AuthFeature.Settings;
 using UP.Api.Features.UserFeature;
 using UP.Api.Services;
 
@@ -22,7 +24,41 @@ public enum CorsMode
 
 public class Bootstrap(WebApplicationBuilder builder)
 {
-    public void AddScoped()
+    private void AddOptions()
+    {
+        builder.Services
+            .AddOptions<JwtOptions>()
+            .BindConfiguration("Jwt")
+            .Validate(options =>
+                !string.IsNullOrWhiteSpace(options.Key),
+                "JWT signing key must be configured.")
+            .Validate(options =>
+                options.Key.Length >= 32,
+                "JWT signing key must be at least 32 characters long.")
+            .Validate(options =>
+                !string.IsNullOrWhiteSpace(options.Issuer),
+                "JWT issuer must be configured.")
+            .Validate(options =>
+                !string.IsNullOrWhiteSpace(options.Audience),
+                "JWT audience must be configured.")
+            .ValidateOnStart();
+
+        builder.Services
+            .AddOptions<AuthOptions>()
+            .BindConfiguration("Auth")
+            .Validate(options =>
+                options.MaxConcurrentDevices > 0,
+                "Maximum concurrent devices must be greater than 0.")
+            .Validate(options =>
+                options.AccessTokenLifetimeMinutes > 0,
+                "Access token lifetime must be greater than 0 minutes.")
+            .Validate(options =>
+                options.RefreshTokenLifetimeMinutes > 0,
+                "Refresh token lifetime must be greater than 0 minutes.")
+            .ValidateOnStart();
+    }
+
+    private void AddScoped()
     {
         builder.Services.AddScoped<IDbContextService, DbContextService>();
         builder.Services.AddScoped<IHttpContextService, HttpContextService>();
@@ -42,7 +78,7 @@ public class Bootstrap(WebApplicationBuilder builder)
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
     }
 
-    public string AddCors()
+    private string AddCors()
     {
         builder.Services.AddCors(options => options.AddPolicy(CorsMode.DevelopmentCors.ToString(), policy => policy
                 .WithOrigins("http://localhost:4200")
@@ -53,10 +89,10 @@ public class Bootstrap(WebApplicationBuilder builder)
         return CorsMode.DevelopmentCors.ToString();
     }
 
-    public void AddDbContext() =>
+    private void AddDbContext() =>
         builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    public void AddIdentityCore()
+    private void AddIdentityCore()
     {
         builder.Services.AddIdentityCore<AuthUser>(options =>
         {
@@ -73,37 +109,53 @@ public class Bootstrap(WebApplicationBuilder builder)
             .AddDefaultTokenProviders();
     }
 
-    public void AddJwtBearer()
+    private void AddJwtBearer(JwtOptions jwtOptions)
     {
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer((options) =>
         {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                context.Token = context.Request.Cookies[TokenNames.AccessToken];
+                ValidateIssuer = true,
+                ValidIssuer = jwtOptions.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtOptions.Audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key)),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
 
-                return Task.CompletedTask;
-            },
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies[TokenNames.AccessToken];
 
-            OnChallenge = contex => throw new AuthError("Access token is invalid or expired.")
-        };
-    });
+                    return Task.CompletedTask;
+                },
+
+                OnChallenge = contex => throw new AuthError("Access token is invalid or expired.")
+            };
+        });
     }
 
-    public async Task RunAsync(IServiceProvider services)
+    public string Init()
+    {
+        var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
+            ?? throw new Exception("JwtOptions should exist");
+
+        AddOptions();
+        AddScoped();
+        AddDbContext();
+        AddIdentityCore();
+        AddJwtBearer(jwtOptions);
+
+        var corseMode = AddCors();
+
+        return corseMode;
+    }
+
+    public async Task RunMigrateAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
 

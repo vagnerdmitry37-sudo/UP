@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Options;
 using UP.Api.Features.AuthFeature.Constants;
+using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Services;
 
 namespace UP.Api.Features.AuthFeature.Services;
@@ -11,10 +13,12 @@ public interface ITokenCookiesService
 
 public class TokenCookiesService(
     IHttpContextService hcs,
+    IOptions<AuthOptions> authOptions,
     IWebHostEnvironment environment
     ) : ITokenCookiesService
 {
     private readonly IHttpContextService _hcs = hcs;
+    private readonly AuthOptions _authOptions = authOptions.Value;
     private readonly IWebHostEnvironment _environment = environment;
 
     public void SetTokenCookies(string assesToken, string refreshTokenValue)
@@ -35,8 +39,8 @@ public class TokenCookiesService(
 
     private (CookieOptions, CookieOptions) CreateTokensCookieOptions()
     {
-        var accessTokenOptions = CreateCookieOptions("/", AuthConstants.AccessTokenLifetimeSeconds);
-        var refreshTokenOptions = CreateCookieOptions(AuthRouts.Base, AuthConstants.RefreshTokenLifetimeSeconds);
+        var accessTokenOptions = CreateCookieOptions("/", _authOptions.AccessTokenLifetimeMinutes);
+        var refreshTokenOptions = CreateCookieOptions(AuthRouts.Base, _authOptions.RefreshTokenLifetimeMinutes);
 
         return (accessTokenOptions, refreshTokenOptions);
     }
@@ -47,6 +51,6 @@ public class TokenCookiesService(
         Secure = !_environment.IsDevelopment(),
         SameSite = SameSiteMode.Lax,
         Path = path,
-        Expires = DateTimeOffset.UtcNow.AddSeconds(expiresInSeconds)
+        Expires = DateTimeOffset.UtcNow.AddMinutes(expiresInSeconds)
     };
 }

@@ -35,7 +35,7 @@ public class AuthControllerService(
         var existingAuthUser = await _ar.FindAuthUserByEmailAsync(request.Email);
         if (existingAuthUser != null)
         {
-            throw new AuthError("An account with this email already exists.");
+            throw new AuthError("Registration not allowed");
         }
 
         var newAuthUser = new AuthUser()
@@ -68,7 +68,7 @@ public class AuthControllerService(
             ?? throw new AuthError("Invalid refresh token");
         validRefreshToken.RevokedAt = DateTimeOffset.UtcNow;
         var authUser = validRefreshToken.AuthUser;
-        _ts.MarkExcessRefreshTokensAsRevoked(validRefreshToken.AuthUser);
+        _ts.MarkExcessRefreshTokensAsRemoved(validRefreshToken.AuthUser);
         await RestoreTokens(authUser);
     }
 

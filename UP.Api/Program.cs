@@ -9,11 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHostedService<AppBackgroundService>();
 
-bootstap.AddDbContext();
-bootstap.AddScoped();
-bootstap.AddIdentityCore();
-bootstap.AddJwtBearer();
-var corsMode = bootstap.AddCors();
+var corsMode = bootstap.Init();
 
 builder.Services.AddControllers(options => options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter()));
 
@@ -33,6 +29,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await bootstap.RunAsync(app.Services);
+await bootstap.RunMigrateAsync(app.Services);
 
 app.Run();
