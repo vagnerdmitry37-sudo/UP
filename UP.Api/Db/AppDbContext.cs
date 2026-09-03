@@ -3,29 +3,27 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UP.Api.Enums;
 using UP.Api.Features.AuditLogFeature;
-using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
+using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.CollectionFeature.Models;
 using UP.Api.Models;
 
 namespace UP.Api.Db;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AuthUser, IdentityRole<int>, int>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AuthUserModel, IdentityRole<int>, int>(options)
 {
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Transfer> Transfers => Set<Transfer>();
     public DbSet<Excursion> Excursions => Set<Excursion>();
     public DbSet<Collection> Collections => Set<Collection>();
-    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<RefreshTokenModel> RefreshTokens => Set<RefreshTokenModel>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<AuthUser>()
-            .HasMany(u => u.RefreshTokens)
-            .WithOne(t => t.AuthUser)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         SetData(builder);
     }

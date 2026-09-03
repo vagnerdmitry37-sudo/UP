@@ -7,7 +7,7 @@ using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Constants;
-using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Services;
@@ -94,7 +94,7 @@ public class Bootstrap(WebApplicationBuilder builder)
 
     private void AddIdentityCore()
     {
-        builder.Services.AddIdentityCore<AuthUser>(options =>
+        builder.Services.AddIdentityCore<AuthUserModel>(options =>
         {
             options.Password.RequiredLength = 8;
             options.Password.RequireDigit = true;

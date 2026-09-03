@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.Data;
 using UP.Api.Features.AppErrorFeature;
-using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
+using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Services;
 
@@ -9,7 +10,7 @@ namespace UP.Api.Features.AuthFeature.Services;
 public interface IAuthControllerService
 {
     Task MeAsync();
-    Task<AuthUser> RegisterAsync(RegisterRequest request);
+    Task<AuthUserModel> RegisterAsync(RegisterRequest request);
     Task LoginAsync(LoginRequest request);
     Task LogoutAsync();
     Task RefreshAsync();
@@ -30,7 +31,7 @@ public class AuthControllerService(
 
     public async Task MeAsync() => await _ar.FindAuthUserByIdAsync(_hcs.GetCurrentAuthUserId());
 
-    public async Task<AuthUser> RegisterAsync(RegisterRequest request)
+    public async Task<AuthUserModel> RegisterAsync(RegisterRequest request)
     {
         var existingAuthUser = await _ar.FindAuthUserByEmailAsync(request.Email);
         if (existingAuthUser != null)
@@ -38,7 +39,7 @@ public class AuthControllerService(
             throw new AuthError("Registration not allowed");
         }
 
-        var newAuthUser = new AuthUser()
+        var newAuthUser = new AuthUserModel()
         {
             Email = request.Email,
             UserName = request.Email,
@@ -58,7 +59,6 @@ public class AuthControllerService(
     {
         var authUser = await ValidateCurrentAuthUserAsync(request)
             ?? throw new AuthError("Invalid user");
-        _ts.MarkExcessRefreshTokensAsRevoked(authUser);
         await RestoreTokens(authUser);
     }
 
@@ -77,7 +77,7 @@ public class AuthControllerService(
         await _dbcs.SaveChangesAsync();
     }
 
-    private async Task<RefreshToken> ValidateCurrentRefreshToken()
+    private async Task<RefreshTokenModel> ValidateCurrentRefreshToken()
     {
         var currentRefreshToken = await _ts.FindCurrentRefreshTokenAsync()
             ?? throw new AuthError("Invalid refresh token");
@@ -92,7 +92,7 @@ public class AuthControllerService(
         return currentRefreshToken;
     }
 
-    private static void RevokeRefreshTokenFamily(RefreshToken token)
+    private static void RevokeRefreshTokenFamily(RefreshTokenModel token)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -103,7 +103,7 @@ public class AuthControllerService(
         }
     }
 
-    private async Task RestoreTokens(AuthUser authUser, RefreshToken? currentRefreshToken = null)
+    private async Task RestoreTokens(AuthUserModel authUser, RefreshTokenModel? currentRefreshToken = null)
     {
         var accessToken = _ts.GenerateAccessToken(authUser);
         var (refreshTokenValue, refreshToken) = _ts.GenerateRefreshToken(authUser.Id, currentRefreshToken?.FamilyId);
@@ -114,12 +114,13 @@ public class AuthControllerService(
             currentRefreshToken.ReplacedByToken = refreshToken;
         }
 
+        _ts.MarkExcessRefreshTokensAsRevoked(authUser);
         _tcs.SetTokenCookies(accessToken, refreshTokenValue);
         authUser.RefreshTokens.Add(refreshToken);
         await _ar.UpdateAuthUserAsync(authUser);
     }
 
-    private async Task<AuthUser?> ValidateCurrentAuthUserAsync(LoginRequest request)
+    private async Task<AuthUserModel?> ValidateCurrentAuthUserAsync(LoginRequest request)
     {
         var authUser = await _ar.FindAuthUserByEmailAsync(request.Email);
         if (authUser is null)

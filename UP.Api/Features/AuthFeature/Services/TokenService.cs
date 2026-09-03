@@ -6,7 +6,8 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UP.Api.Features.AuthFeature.Constants;
-using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
+using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Settings;
@@ -16,10 +17,10 @@ namespace UP.Api.Features.AuthFeature.Services;
 
 public interface ITokenService
 {
-    string GenerateAccessToken(AuthUser authUser);
-    (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null);
-    void MarkExcessRefreshTokensAsRevoked(AuthUser authUser);
-    Task<RefreshToken?> FindCurrentRefreshTokenAsync();
+    string GenerateAccessToken(AuthUserModel authUser);
+    (string refreshTokenValue, RefreshTokenModel refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null);
+    void MarkExcessRefreshTokensAsRevoked(AuthUserModel authUser);
+    Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync();
 }
 
 public class TokenService(
@@ -33,7 +34,7 @@ public class TokenService(
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
     private readonly AuthOptions _authOptions = authOptions.Value;
 
-    public string GenerateAccessToken(AuthUser authUser)
+    public string GenerateAccessToken(AuthUserModel authUser)
     {
         ArgumentNullException.ThrowIfNull(authUser.Email);
 
@@ -55,7 +56,7 @@ public class TokenService(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null)
+    public (string refreshTokenValue, RefreshTokenModel refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null)
     {
         var now = DateTimeOffset.UtcNow;
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
@@ -63,7 +64,7 @@ public class TokenService(
 
         return (
             refreshTokenValue,
-            new RefreshToken
+            new RefreshTokenModel
             {
                 TokenHash = tokenHash,
                 CreatedAt = now,
@@ -74,7 +75,7 @@ public class TokenService(
         );
     }
 
-    public void MarkExcessRefreshTokensAsRevoked(AuthUser authUser)
+    public void MarkExcessRefreshTokensAsRevoked(AuthUserModel authUser)
     {
         var tokensToRevoke = authUser.RefreshTokens
             .Where(r => r.IsActive)
@@ -93,7 +94,7 @@ public class TokenService(
         }
     }
 
-    public async Task<RefreshToken?> FindCurrentRefreshTokenAsync()
+    public async Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync()
     {
         var refreshTokenValue = _hcs.FindRequestCookie(TokenNames.RefreshToken);
         if (refreshTokenValue is null)

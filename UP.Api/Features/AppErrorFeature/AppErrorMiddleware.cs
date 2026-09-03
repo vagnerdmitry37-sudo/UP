@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace UP.Api.Features.AppErrorFeature;
 
 public class AppErrorMiddleware(RequestDelegate next)
@@ -9,6 +11,16 @@ public class AppErrorMiddleware(RequestDelegate next)
         try
         {
             await _next(context);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+
+            await context.Response.WriteAsJsonAsync(new AppErrorResponses
+            {
+                Message = "Refresh token is no longer valid",
+                StatusCode = StatusCodes.Status401Unauthorized
+            });
         }
         catch (AppError ex)
         {

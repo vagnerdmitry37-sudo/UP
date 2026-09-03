@@ -1,6 +1,9 @@
-namespace UP.Api.Features.AuthFeature.Models;
+using System.ComponentModel.DataAnnotations;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
 
-public class RefreshToken
+namespace UP.Api.Features.AuthFeature.Models.RefreshToken;
+
+public class RefreshTokenModel
 {
     public int Id { get; set; }
 
@@ -17,8 +20,11 @@ public class RefreshToken
     public Guid FamilyId { get; set; }
 
     public int? ReplacedByTokenId { get; set; }
-    public RefreshToken? ReplacedByToken { get; set; }
+    public RefreshTokenModel? ReplacedByToken { get; set; }
 
     public int AuthUserId { get; set; }
-    public AuthUser AuthUser { get; set; } = null!;
+    public AuthUserModel AuthUser { get; set; } = null!;
+
+    [Timestamp]
+    public uint Version { get; set; }
 }

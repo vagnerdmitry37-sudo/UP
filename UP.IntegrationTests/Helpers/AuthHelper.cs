@@ -3,19 +3,20 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using UP.Api.Db;
-using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
+using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.IntegrationTests.Infrastructure;
 
 namespace UP.IntegrationTests.Helpers;
 
 public class AuthHelper(CustomWebApplicationFactory factory)
 {
-    public async Task<(AuthUser, IdentityResult)> CreateAuthUserAsync(RegisterRequest request)
+    public async Task<(AuthUserModel, IdentityResult)> CreateAuthUserAsync(RegisterRequest request)
     {
         using var scope = factory.Services.CreateScope();
-        var userMeneger = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+        var userMeneger = scope.ServiceProvider.GetRequiredService<UserManager<AuthUserModel>>();
 
-        var newAuthUser = new AuthUser
+        var newAuthUser = new AuthUserModel
         {
             Email = request.Email,
             UserName = request.Email,
@@ -26,15 +27,15 @@ public class AuthHelper(CustomWebApplicationFactory factory)
         return (newAuthUser, identityResult);
     }
 
-    public async Task<AuthUser?> FindAuthUserByEmailAsync(string email)
+    public async Task<AuthUserModel?> FindAuthUserByEmailAsync(string email)
     {
         using var scope = factory.Services.CreateScope();
-        var userMeneger = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+        var userMeneger = scope.ServiceProvider.GetRequiredService<UserManager<AuthUserModel>>();
 
         return await userMeneger.FindByEmailAsync(email);
     }
 
-    public async Task<RefreshToken?> FindCurrentRefreshTokenAsync(string value)
+    public async Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync(string value)
     {
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();

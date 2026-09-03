@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using UP.Api.Features.AuthFeature.Models;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
 
 namespace UP.Api.Features.BootstrapFeatuer;
 
@@ -8,7 +8,7 @@ public class RootUserSeeder
     public static async Task SeedAsync(IServiceProvider services)
     {
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
-        var userManager = services.GetRequiredService<UserManager<AuthUser>>();
+        var userManager = services.GetRequiredService<UserManager<AuthUserModel>>();
         var configuration = services.GetRequiredService<IConfiguration>();
 
         const string rootRole = "Root";
@@ -45,7 +45,7 @@ public class RootUserSeeder
 
         if (rootUser is null)
         {
-            rootUser = new AuthUser
+            rootUser = new AuthUserModel
             {
                 UserName = email,
                 Email = email,
