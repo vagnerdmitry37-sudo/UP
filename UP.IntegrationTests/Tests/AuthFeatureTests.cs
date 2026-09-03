@@ -71,13 +71,13 @@ public class AuthFeatureTests(ShareFixture sf) : IClassFixture<ShareFixture>
 
         var refreshHttpResponse = await sf.Client.PostAsJsonAsync(AuthRouts.Refresh, refreshTokenRequest);
         var refreshResponse = await refreshHttpResponse.Content.ReadFromJsonAsync<AuthResponse>();
-        var existedRefreshToken = await sf.Auth.FindRefreshTokenByValueAsync(loginResponse!.RefreshToken);
+        var existedRefreshToken = await sf.Auth.FindCurrentRefreshTokenAsync(loginResponse!.RefreshToken);
         refreshResponse!.AccessToken.Should().NotBeNullOrEmpty();
         refreshResponse!.RefreshToken.Should().NotBeNullOrEmpty();
         existedRefreshToken!.IsActive.Should().BeFalse();
         existedRefreshToken.RevokedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
 
-        var newRrfreshToknen = await sf.Auth.FindRefreshTokenByValueAsync(refreshResponse!.RefreshToken);
+        var newRrfreshToknen = await sf.Auth.FindCurrentRefreshTokenAsync(refreshResponse!.RefreshToken);
         newRrfreshToknen!.IsActive.Should().BeTrue();
         newRrfreshToknen.RevokedAt.Should().BeNull();
     }

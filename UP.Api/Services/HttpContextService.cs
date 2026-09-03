@@ -8,7 +8,7 @@ public interface IHttpContextService
     string? FindRequestCookie(string key);
     string GetCurrentAuthUserId();
     void AppendResponseCookie(string name, string value, CookieOptions options);
-    void DeleteResponseCookie(string key, CookieOptions? option);
+    void DeleteResponseCookie(string key, CookieOptions option);
 }
 
 public class HttpContextService(IHttpContextAccessor accessor) : IHttpContextService
@@ -27,5 +27,5 @@ public class HttpContextService(IHttpContextAccessor accessor) : IHttpContextSer
             ?? throw new Exception("User could not be identified");
     }
 
-    public void DeleteResponseCookie(string key, CookieOptions? option = null) => ResponseCookies.Delete(key, option);
+    public void DeleteResponseCookie(string key, CookieOptions option) => ResponseCookies.Delete(key, option);
 }

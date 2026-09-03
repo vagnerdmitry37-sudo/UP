@@ -7,7 +7,7 @@ namespace UP.Api.Features.AuthFeature.Services;
 
 public interface ITokenCookiesService
 {
-    void SetTokenCookies(string assesToken, string refreshTokenValue);
+    void SetTokenCookies(string accessToken, string refreshTokenValue);
     void DeleteTokensCookies();
 }
 
@@ -21,11 +21,11 @@ public class TokenCookiesService(
     private readonly AuthOptions _authOptions = authOptions.Value;
     private readonly IWebHostEnvironment _environment = environment;
 
-    public void SetTokenCookies(string assesToken, string refreshTokenValue)
+    public void SetTokenCookies(string accessToken, string refreshTokenValue)
     {
         var (accessTokenOptions, refreshTokenOptions) = CreateTokensCookieOptions();
 
-        _hcs.AppendResponseCookie(TokenNames.AccessToken, assesToken, accessTokenOptions);
+        _hcs.AppendResponseCookie(TokenNames.AccessToken, accessToken, accessTokenOptions);
         _hcs.AppendResponseCookie(TokenNames.RefreshToken, refreshTokenValue, refreshTokenOptions);
     }
 

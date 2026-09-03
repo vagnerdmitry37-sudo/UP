@@ -47,8 +47,8 @@ public class Bootstrap(WebApplicationBuilder builder)
             .AddOptions<AuthOptions>()
             .BindConfiguration("Auth")
             .Validate(options =>
-                options.MaxConcurrentDevices > 0,
-                "Maximum concurrent devices must be greater than 0.")
+                options.MaxConcurrentFamilies > 0,
+                "Maximum concurrent families must be greater than 0.")
             .Validate(options =>
                 options.AccessTokenLifetimeMinutes > 0,
                 "Access token lifetime must be greater than 0 minutes.")

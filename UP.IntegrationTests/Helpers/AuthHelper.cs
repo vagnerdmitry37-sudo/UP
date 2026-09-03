@@ -34,7 +34,7 @@ public class AuthHelper(CustomWebApplicationFactory factory)
         return await userMeneger.FindByEmailAsync(email);
     }
 
-    public async Task<RefreshToken?> FindRefreshTokenByValueAsync(string value)
+    public async Task<RefreshToken?> FindCurrentRefreshTokenAsync(string value)
     {
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();

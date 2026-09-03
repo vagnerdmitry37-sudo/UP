@@ -12,7 +12,7 @@ public interface IAuthRepository
     Task<AuthUser?> FindAuthUserByEmailAsync(string email);
     Task<bool> CheckPasswordAsync(AuthUser authUser, string password);
     Task<AuthUser?> FindAuthUserByIdAsync(string id);
-    Task<RefreshToken?> FindRefreshTokenByValueAsync(string refreshTokenValue);
+    Task<RefreshToken?> FindCurrentRefreshTokenAsync(string refreshTokenValue);
     void RemoveRefreshTokens(ICollection<RefreshToken> refreshTokens);
 }
 
@@ -30,7 +30,7 @@ public class AuthRepository(
     public async Task<AuthUser?> FindAuthUserByIdAsync(string id) => await _manager.FindByIdAsync(id);
     public async Task<bool> CheckPasswordAsync(AuthUser authUser, string password)
         => await _manager.CheckPasswordAsync(authUser, password);
-    public async Task<RefreshToken?> FindRefreshTokenByValueAsync(string tokenHash) =>
+    public async Task<RefreshToken?> FindCurrentRefreshTokenAsync(string tokenHash) =>
          await _context.RefreshTokens
             .Include(r => r.AuthUser)
             .ThenInclude(a => a.RefreshTokens)

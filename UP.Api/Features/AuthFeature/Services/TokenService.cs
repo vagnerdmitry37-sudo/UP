@@ -17,10 +17,9 @@ namespace UP.Api.Features.AuthFeature.Services;
 public interface ITokenService
 {
     string GenerateAccessToken(AuthUser authUser);
-    (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId);
-    Task<RefreshToken?> ValidateRefreshToken();
-    void MarkExcessRefreshTokensAsRemoved(AuthUser authUser);
-    Task MarkCurrentRefreshTokenAsRevokedAsync();
+    (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null);
+    void MarkExcessRefreshTokensAsRevoked(AuthUser authUser);
+    Task<RefreshToken?> FindCurrentRefreshTokenAsync();
 }
 
 public class TokenService(
@@ -56,7 +55,7 @@ public class TokenService(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId)
+    public (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null)
     {
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
@@ -69,46 +68,31 @@ public class TokenService(
                 CreatedAt = DateTimeOffset.UtcNow,
                 ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(_authOptions.RefreshTokenLifetimeMinutes),
                 AuthUserId = authUserId,
+                FamilyId = familyId ?? Guid.NewGuid(),
             }
         );
     }
 
-    public async Task<RefreshToken?> ValidateRefreshToken()
+    public void MarkExcessRefreshTokensAsRevoked(AuthUser authUser)
     {
-        var refreshToken = await FindRefreshTokenByValueAsync();
-
-        if (refreshToken is null || !refreshToken.IsActive)
-        {
-            return null;
-        }
-
-        return refreshToken;
-    }
-
-    public void MarkExcessRefreshTokensAsRemoved(AuthUser authUser)
-    {
-        var tokensToRemove = authUser.RefreshTokens
+        var tokensToRevoke = authUser.RefreshTokens
             .Where(r => r.IsActive)
             .OrderByDescending(x => x.CreatedAt)
-            .Skip(_authOptions.MaxConcurrentDevices)
+            .Skip(_authOptions.MaxConcurrentFamilies)
             .ToList();
 
-        if (tokensToRemove.Count > 0)
+        if (tokensToRevoke.Count > 0)
         {
-            _ar.RemoveRefreshTokens(tokensToRemove);
+            var now = DateTimeOffset.UtcNow;
+
+            foreach (var token in tokensToRevoke)
+            {
+                token.RevokedAt = now;
+            }
         }
     }
 
-    public async Task MarkCurrentRefreshTokenAsRevokedAsync()
-    {
-        var refreshToken = await FindRefreshTokenByValueAsync();
-        if (refreshToken is not null && refreshToken.IsActive)
-        {
-            refreshToken.RevokedAt = DateTimeOffset.UtcNow;
-        }
-    }
-
-    private async Task<RefreshToken?> FindRefreshTokenByValueAsync()
+    public async Task<RefreshToken?> FindCurrentRefreshTokenAsync()
     {
         var refreshTokenValue = _hcs.FindRequestCookie(TokenNames.RefreshToken);
         if (refreshTokenValue is null)
@@ -116,6 +100,6 @@ public class TokenService(
             return null;
         }
         var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
-        return await _ar.FindRefreshTokenByValueAsync(tokenHash);
+        return await _ar.FindCurrentRefreshTokenAsync(tokenHash);
     }
 }
