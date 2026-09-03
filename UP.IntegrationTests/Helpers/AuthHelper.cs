@@ -39,6 +39,6 @@ public class AuthHelper(CustomWebApplicationFactory factory)
         using var scope = factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        return await context.RefreshTokens.FirstOrDefaultAsync(t => t.Value == value);
+        return await context.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == value);
     }
 }

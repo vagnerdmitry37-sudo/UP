@@ -58,6 +58,7 @@ public class AuthControllerService(
     {
         var authUser = await ValidateCurrentAuthUserAsync(request)
             ?? throw new AuthError("Invalid user");
+        _ts.MarkExcessRefreshTokensAsRevoked(authUser);
         await RestoreTokens(authUser);
     }
 
@@ -65,7 +66,6 @@ public class AuthControllerService(
     {
         var currentRefreshToken = await ValidateCurrentRefreshToken();
         var authUser = currentRefreshToken.AuthUser;
-        _ts.MarkExcessRefreshTokensAsRevoked(authUser);
         await RestoreTokens(authUser, currentRefreshToken);
     }
 
@@ -79,24 +79,27 @@ public class AuthControllerService(
 
     private async Task<RefreshToken> ValidateCurrentRefreshToken()
     {
-        var curretRefreshToken = await _ts.FindCurrentRefreshTokenAsync()
+        var currentRefreshToken = await _ts.FindCurrentRefreshTokenAsync()
             ?? throw new AuthError("Invalid refresh token");
 
-        if (!curretRefreshToken.IsActive)
+        if (currentRefreshToken.ReplacedByToken is not null)
         {
-            RevokeRefreshTokenFamily(curretRefreshToken);
+            RevokeRefreshTokenFamily(currentRefreshToken);
+            await _dbcs.SaveChangesAsync();
             throw new AuthError("Refresh token reuse detected");
         }
 
-        return curretRefreshToken;
+        return currentRefreshToken;
     }
 
     private static void RevokeRefreshTokenFamily(RefreshToken token)
     {
+        var now = DateTimeOffset.UtcNow;
+
         foreach (var familyToken in token.AuthUser.RefreshTokens
             .Where(x => x.FamilyId == token.FamilyId && x.IsActive))
         {
-            familyToken.RevokedAt = DateTimeOffset.UtcNow;
+            familyToken.RevokedAt = now;
         }
     }
 

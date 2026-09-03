@@ -45,12 +45,12 @@ public class TokenCookiesService(
         return (accessTokenOptions, refreshTokenOptions);
     }
 
-    private CookieOptions CreateCookieOptions(string path, int expiresInSeconds) => new()
+    private CookieOptions CreateCookieOptions(string path, int expiresInMinutes) => new()
     {
         HttpOnly = true,
         Secure = !_environment.IsDevelopment(),
         SameSite = SameSiteMode.Lax,
         Path = path,
-        Expires = DateTimeOffset.UtcNow.AddMinutes(expiresInSeconds)
+        Expires = DateTimeOffset.UtcNow.AddMinutes(expiresInMinutes)
     };
 }

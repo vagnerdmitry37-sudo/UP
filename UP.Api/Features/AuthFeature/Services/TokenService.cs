@@ -57,6 +57,7 @@ public class TokenService(
 
     public (string refreshTokenValue, RefreshToken refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null)
     {
+        var now = DateTimeOffset.UtcNow;
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
 
@@ -65,8 +66,8 @@ public class TokenService(
             new RefreshToken
             {
                 TokenHash = tokenHash,
-                CreatedAt = DateTimeOffset.UtcNow,
-                ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(_authOptions.RefreshTokenLifetimeMinutes),
+                CreatedAt = now,
+                ExpiresAt = now.AddMinutes(_authOptions.RefreshTokenLifetimeMinutes),
                 AuthUserId = authUserId,
                 FamilyId = familyId ?? Guid.NewGuid(),
             }
