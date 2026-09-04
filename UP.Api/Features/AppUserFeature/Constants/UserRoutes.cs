@@ -1,4 +1,4 @@
-namespace UP.Api.Features.UserFeature;
+namespace UP.Api.Features.AppUserFeature.Constants;
 
 public static class UserRoutes
 {

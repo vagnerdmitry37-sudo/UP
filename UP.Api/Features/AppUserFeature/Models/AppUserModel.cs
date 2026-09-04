@@ -1,6 +1,6 @@
-namespace UP.Api.Features.UserFeature.Models;
+namespace UP.Api.Features.AppUserFeature.Models;
 
-public class User
+public class AppUserModel
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";

@@ -10,7 +10,6 @@ using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
-using UP.Api.Features.AuthFeature.Settings;
 using UP.Api.Services;
 
 namespace UP.Api.Features.AuthFeature.Services;

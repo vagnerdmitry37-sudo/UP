@@ -27,7 +27,11 @@ public class AuthRepository(
     public async Task<IdentityResult> CreateAuthUserAsync(AuthUserModel authUser, string password)
         => await _manager.CreateAsync(authUser, password);
     public async Task<IdentityResult> UpdateAuthUserAsync(AuthUserModel authUser) => await _manager.UpdateAsync(authUser);
-    public async Task<AuthUserModel?> FindAuthUserByEmailAsync(string email) => await _manager.FindByEmailAsync(email);
+    public async Task<AuthUserModel?> FindAuthUserByEmailAsync(string email) =>
+        await _manager.Users
+            .Include(u => u.RefreshTokens
+                .OrderByDescending(rt => rt.CreatedAt))
+        .FirstOrDefaultAsync(u => u.Email == email);
     public async Task<AuthUserModel?> FindAuthUserByIdAsync(string id) => await _manager.FindByIdAsync(id);
     public async Task<bool> CheckPasswordAsync(AuthUserModel authUser, string password)
         => await _manager.CheckPasswordAsync(authUser, password);

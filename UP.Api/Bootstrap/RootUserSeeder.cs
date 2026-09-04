@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 
-namespace UP.Api.Features.BootstrapFeatuer;
+namespace UP.Api.BootstrapFeatuer;
 
 public class RootUserSeeder
 {

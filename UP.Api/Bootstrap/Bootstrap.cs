@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using UP.Api.BootstrapFeatuer;
 using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuditLogFeature;
@@ -11,11 +12,10 @@ using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Services;
-using UP.Api.Features.AuthFeature.Settings;
-using UP.Api.Features.UserFeature;
+using UP.Api.Features.AppUserFeature.Repositories;
 using UP.Api.Services;
 
-namespace UP.Api.Features.BootstrapFeatuer;
+namespace UP.Api.Bootstrap;
 
 public enum CorsMode
 {
@@ -64,8 +64,7 @@ public class Bootstrap(WebApplicationBuilder builder)
         builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 
         // User feature
-        builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 
         // AuditLog feature
         builder.Services.AddScoped<IAuditLogService, AuditLogService>();

@@ -6,12 +6,14 @@ using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.CollectionFeature.Models;
+using UP.Api.Features.AppUserFeature.Models;
 using UP.Api.Models;
 
 namespace UP.Api.Db;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AuthUserModel, IdentityRole<int>, int>(options)
 {
+    public DbSet<AppUserModel> AppUsers => Set<AppUserModel>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Transfer> Transfers => Set<Transfer>();

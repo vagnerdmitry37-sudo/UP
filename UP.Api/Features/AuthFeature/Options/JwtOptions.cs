@@ -1,4 +1,4 @@
-namespace UP.Api.Features.AuthFeature.Settings;
+namespace UP.Api.Features.AuthFeature.Options;
 
 public sealed class JwtOptions
 {

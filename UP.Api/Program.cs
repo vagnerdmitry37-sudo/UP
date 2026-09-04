@@ -1,5 +1,5 @@
+using UP.Api.Bootstrap;
 using UP.Api.Features.AppErrorFeature;
-using UP.Api.Features.BootstrapFeatuer;
 using UP.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);

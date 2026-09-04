@@ -1,15 +1,16 @@
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using UP.Api.Db;
-using UP.IntegrationTests.Helpers;
-using UP.IntegrationTests.Infrastructure;
+using UP.Api.Features.AuthFeature.Models.AuthUser;
+using UP.Api.Features.AuthFeature.Repositories;
 
-namespace UP.IntegrationTests.Fixtures;
+namespace UP.IntegrationTests.Infrastructure;
 
 public class ShareFixture : IAsyncLifetime
 {
-    public AuthHelper Auth { get; private set; } = null!;
     public HttpClient Client { get; private set; } = null!;
     public CustomWebApplicationFactory Factory { get; private set; } = null!;
 
@@ -24,9 +25,11 @@ public class ShareFixture : IAsyncLifetime
     {
         await _container.StartAsync();
         Factory = new CustomWebApplicationFactory(_container.GetConnectionString());
-        Client = Factory.CreateClient();
+        Client = Factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = true
+        });
         await MigrateDatabaseAsync();
-        Auth = new AuthHelper(Factory);
     }
 
     public async Task DisposeAsync()
@@ -34,6 +37,28 @@ public class ShareFixture : IAsyncLifetime
         Client.Dispose();
         await Factory.DisposeAsync();
         await _container.DisposeAsync();
+    }
+
+    public async Task<LoginRequest> RegisterRootAuthUser()
+    {
+        var scope = Factory.Services.CreateScope();
+
+        var authUser = new AuthUserModel
+        {
+            Email = "testRoot@mail.com",
+            UserName = "TestRoot",
+        };
+
+        var loginRequest = new LoginRequest
+        {
+            Email = authUser.Email,
+            Password = "Password123@"
+        };
+
+        await scope.ServiceProvider.GetRequiredService<IAuthRepository>()
+            .CreateAuthUserAsync(authUser, loginRequest.Password);
+
+        return loginRequest;
     }
 
     private async Task MigrateDatabaseAsync()

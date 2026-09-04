@@ -57,9 +57,10 @@ public class AuthControllerService(
 
     public async Task LoginAsync(LoginRequest request)
     {
+        var currentRefreshToken = await _ts.FindCurrentRefreshTokenAsync();
         var authUser = await ValidateCurrentAuthUserAsync(request)
             ?? throw new AuthError("Invalid user");
-        await RestoreTokens(authUser);
+        await RestoreTokens(authUser, currentRefreshToken);
     }
 
     public async Task RefreshAsync()

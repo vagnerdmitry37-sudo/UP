@@ -34,10 +34,7 @@ public sealed class CustomWebApplicationFactory(string connectionString) : WebAp
                 services.Remove(descriptor);
             }
 
-            services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseNpgsql(_connectionString);
-            });
+            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(_connectionString));
         });
     }
 }

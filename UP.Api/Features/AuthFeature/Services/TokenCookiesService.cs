@@ -40,7 +40,7 @@ public class TokenCookiesService(
     private (CookieOptions, CookieOptions) CreateTokensCookieOptions()
     {
         var accessTokenOptions = CreateCookieOptions("/", _authOptions.AccessTokenLifetimeMinutes);
-        var refreshTokenOptions = CreateCookieOptions(AuthRouts.Base, _authOptions.RefreshTokenLifetimeMinutes);
+        var refreshTokenOptions = CreateCookieOptions($"/{AuthRouts.Base}", _authOptions.RefreshTokenLifetimeMinutes);
 
         return (accessTokenOptions, refreshTokenOptions);
     }

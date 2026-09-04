@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using UP.Api.Features.UserFeature;
+using UP.Api.Features.AppUserFeature.Constants;
 
 [ApiController]
 [Route(UserRoutes.Base)]
-public class UserController(IUserService us) : ControllerBase
+public class AppUserController() : ControllerBase
 {
-    private readonly IUserService _us = us;
-
     [HttpPost]
     public async Task<ActionResult> Create()
     {
