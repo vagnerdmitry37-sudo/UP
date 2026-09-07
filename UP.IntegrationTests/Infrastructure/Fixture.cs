@@ -1,15 +1,14 @@
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using Respawn;
 using Testcontainers.PostgreSql;
 using UP.Api.Db;
-using UP.Api.Features.AuthFeature.Models.AuthUser;
-using UP.Api.Features.AuthFeature.Repositories;
 
 namespace UP.IntegrationTests.Infrastructure;
 
-public class ShareFixture : IAsyncLifetime
+public class Fixture : IAsyncLifetime
 {
     public HttpClient Client { get; private set; } = null!;
     public CustomWebApplicationFactory Factory { get; private set; } = null!;
@@ -20,45 +19,45 @@ public class ShareFixture : IAsyncLifetime
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
+    private Respawner _respawner = null!;
+    private string _connectionString = null!;
 
     public async Task InitializeAsync()
     {
         await _container.StartAsync();
-        Factory = new CustomWebApplicationFactory(_container.GetConnectionString());
+
+        _connectionString = _container.GetConnectionString();
+        Factory = new CustomWebApplicationFactory(_connectionString);
         Client = Factory.CreateClient(new WebApplicationFactoryClientOptions
         {
             HandleCookies = true
         });
+
         await MigrateDatabaseAsync();
+
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(connection,
+            new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = ["public"]
+            });
     }
 
     public async Task DisposeAsync()
     {
-        Client.Dispose();
         await Factory.DisposeAsync();
         await _container.DisposeAsync();
     }
 
-    public async Task<LoginRequest> RegisterRootAuthUser()
+    public async Task ResetDatabaseAsync()
     {
-        var scope = Factory.Services.CreateScope();
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
 
-        var authUser = new AuthUserModel
-        {
-            Email = "testRoot@mail.com",
-            UserName = "TestRoot",
-        };
-
-        var loginRequest = new LoginRequest
-        {
-            Email = authUser.Email,
-            Password = "Password123@"
-        };
-
-        await scope.ServiceProvider.GetRequiredService<IAuthRepository>()
-            .CreateAuthUserAsync(authUser, loginRequest.Password);
-
-        return loginRequest;
+        await _respawner.ResetAsync(connection);
     }
 
     private async Task MigrateDatabaseAsync()

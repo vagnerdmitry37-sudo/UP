@@ -5,7 +5,7 @@ namespace UP.Api.Services;
 
 public interface IHttpContextService
 {
-    string? FindRequestCookie(string key);
+    string? FindRequestCookieByKey(string key);
     string GetCurrentAuthUserId();
     void AppendResponseCookie(string name, string value, CookieOptions options);
     void DeleteResponseCookie(string key, CookieOptions option);
@@ -17,7 +17,11 @@ public class HttpContextService(IHttpContextAccessor accessor) : IHttpContextSer
     private IResponseCookies ResponseCookies => _accessor.HttpContext?.Response.Cookies
         ?? throw new AuthError("Response cookies not found");
 
-    public string? FindRequestCookie(string key) => _accessor.HttpContext?.Request.Cookies[key];
+    public string? FindRequestCookieByKey(string key)
+    {
+        var cookies = _accessor.HttpContext?.Request.Cookies;
+        return cookies?[key];
+    }
 
     public void AppendResponseCookie(string name, string value, CookieOptions options) => ResponseCookies.Append(name, value, options);
 

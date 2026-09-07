@@ -95,7 +95,7 @@ public class TokenService(
 
     public async Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync()
     {
-        var refreshTokenValue = _hcs.FindRequestCookie(TokenNames.RefreshToken);
+        var refreshTokenValue = _hcs.FindRequestCookieByKey(TokenNames.RefreshToken);
         if (refreshTokenValue is null)
         {
             return null;
