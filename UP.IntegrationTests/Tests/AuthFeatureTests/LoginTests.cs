@@ -4,13 +4,17 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuthFeature.Constants;
+using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
+using UP.Api.Features.AuthFeature.Services;
 using UP.IntegrationTests.Infrastructure;
 
 namespace UP.IntegrationTests.Tests.AuthFeatureTests;
@@ -118,6 +122,68 @@ public class LoginTests(Fixture fixture) : TestBase(fixture)
         previousToken.ReplacedByToken!.Id.Should().Be(newToken.Id);
 
         newToken.FamilyId.Should().Be(previousToken.FamilyId);
+    }
+
+    [Fact]
+    public async Task Should_Provoke_Excessive_Refresh_Tokens()
+    {
+        using var scope = Fixture.Factory.Services.CreateScope();
+
+        var credantials = await RegisterRootAuthUser();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var ts = scope.ServiceProvider.GetRequiredService<ITokenService>();
+        var ar = scope.ServiceProvider.GetRequiredService<IAuthRepository>();
+        var ao = scope.ServiceProvider.GetRequiredService<IOptions<AuthOptions>>();
+        var authUser = await ar.FindAuthUserByEmailAsync(credantials.Email);
+        ICollection<RefreshTokenModel> refreshTokens = [];
+
+        for (int i = 0; i < 10; i++)
+        {
+            var (_, refreshToken) = ts.GenerateRefreshToken(authUser!.Id);
+            refreshTokens.Add(refreshToken);
+        }
+
+        await context.RefreshTokens.AddRangeAsync(refreshTokens);
+        await context.SaveChangesAsync();
+
+        await Fixture.Client.PostAsJsonAsync(AuthRouts.Login, credantials);
+
+        var existingRefreshTokens = await context.RefreshTokens
+            .Where(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTimeOffset.UtcNow)
+            .ToListAsync();
+
+        existingRefreshTokens.Should().HaveCount(ao.Value.MaxConcurrentFamilies);
+    }
+
+    [Fact]
+    public async Task Should_Login_Multiply_Users()
+    {
+        using var scope = Fixture.Factory.Services.CreateScope();
+
+        var acs = scope.ServiceProvider.GetRequiredService<IAuthControllerService>();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var numberOfAuthUsers = 100;
+
+        for (int i = 0; i < numberOfAuthUsers; i++)
+        {
+            var authUser = new RegisterRequest()
+            {
+                Email = $"test{i}@maail.com",
+                Password = $"Password123@{i}"
+            };
+
+            var loginRequest = new LoginRequest
+            {
+                Email = authUser.Email,
+                Password = authUser.Password,
+            };
+
+            await acs.RegisterAsync(authUser);
+            await Fixture.Client.PostAsJsonAsync(AuthRouts.Login, loginRequest);
+        }
+
+        var authUsers = await context.Users.ToListAsync();
+        authUsers.Should().HaveCount(numberOfAuthUsers);
     }
 }
 

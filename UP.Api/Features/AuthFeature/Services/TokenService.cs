@@ -61,6 +61,7 @@ public class TokenService(
         var refreshTokenValue = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
 
+
         return (
             refreshTokenValue,
             new RefreshTokenModel
@@ -79,7 +80,7 @@ public class TokenService(
         var tokensToRevoke = authUser.RefreshTokens
             .Where(r => r.IsActive)
             .OrderByDescending(x => x.CreatedAt)
-            .Skip(_authOptions.MaxConcurrentFamilies)
+            .Skip(_authOptions.MaxConcurrentFamilies - 1)
             .ToList();
 
         if (tokensToRevoke.Count > 0)
