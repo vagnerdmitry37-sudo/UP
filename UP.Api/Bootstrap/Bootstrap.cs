@@ -6,13 +6,13 @@ using Microsoft.IdentityModel.Tokens;
 using UP.Api.BootstrapFeatuer;
 using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
+using UP.Api.Features.AppUserFeature.Repositories;
 using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Services;
-using UP.Api.Features.AppUserFeature.Repositories;
 using UP.Api.Services;
 
 namespace UP.Api.Bootstrap;

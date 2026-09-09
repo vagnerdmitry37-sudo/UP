@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UP.Api.Enums;
+using UP.Api.Features.AppUserFeature.Models;
 using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.CollectionFeature.Models;
-using UP.Api.Features.AppUserFeature.Models;
 using UP.Api.Models;
 
 namespace UP.Api.Db;
