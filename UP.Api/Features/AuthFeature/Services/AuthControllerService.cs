@@ -3,6 +3,7 @@ using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Models.RefreshToken;
 using UP.Api.Features.AuthFeature.Repositories;
+using UP.Api.Features.AuthFeature.Requests;
 using UP.Api.Services;
 
 namespace UP.Api.Features.AuthFeature.Services;
@@ -14,6 +15,7 @@ public interface IAuthControllerService
     Task LoginAsync(LoginRequest request);
     Task LogoutAsync();
     Task RefreshAsync();
+    Task ChangePasswordAsync(ChangePasswordRequest request);
 }
 
 public class AuthControllerService(
@@ -29,7 +31,11 @@ public class AuthControllerService(
     private readonly IHttpContextService _hcs = hcs;
     private readonly ITokenCookiesService _tcs = tcs;
 
-    public async Task MeAsync() => await _ar.FindAuthUserByIdAsync(_hcs.GetCurrentAuthUserId());
+    public async Task MeAsync()
+    {
+        var currentAuthUserId = _hcs.GetCurrentAuthUserId() ?? throw new AuthError("Unauthorized user");
+        await _ar.FindAuthUserByIdAsync(currentAuthUserId);
+    }
 
     public async Task<AuthUserModel> RegisterAsync(RegisterRequest request)
     {
@@ -78,6 +84,13 @@ public class AuthControllerService(
         await _dbcs.SaveChangesAsync();
     }
 
+    public async Task ChangePasswordAsync(ChangePasswordRequest request)
+    {
+        var authUserId = _hcs.GetCurrentAuthUserId() ?? throw new AuthError("User id not found");
+        var authUser = await _ar.FindAuthUserByIdAsync(authUserId) ?? throw new AuthError("User not found");
+        await _ar.ChangePassword(authUser, request.CurrentPassword, request.NewPassword);
+    }
+
     private async Task<RefreshTokenModel> ValidateCurrentRefreshToken()
     {
         var currentRefreshToken = await _ts.FindCurrentRefreshTokenAsync()
@@ -115,7 +128,7 @@ public class AuthControllerService(
             currentRefreshToken.ReplacedByToken = refreshToken;
         }
 
-        _ts.MarkExcessRefreshTokensAsRevoked(authUser);
+        _ts.MarkExcessRefreshTokensAsRevoked(authUser, refreshToken);
         _tcs.SetTokenCookies(accessToken, refreshTokenValue);
         authUser.RefreshTokens.Add(refreshToken);
         await _ar.UpdateAuthUserAsync(authUser);

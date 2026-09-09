@@ -18,7 +18,7 @@ public interface ITokenService
 {
     string GenerateAccessToken(AuthUserModel authUser);
     (string refreshTokenValue, RefreshTokenModel refreshToken) GenerateRefreshToken(int authUserId, Guid? familyId = null);
-    void MarkExcessRefreshTokensAsRevoked(AuthUserModel authUser);
+    void MarkExcessRefreshTokensAsRevoked(AuthUserModel authUser, RefreshTokenModel refreshToken);
     Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync();
 }
 
@@ -75,7 +75,7 @@ public class TokenService(
         );
     }
 
-    public void MarkExcessRefreshTokensAsRevoked(AuthUserModel authUser)
+    public void MarkExcessRefreshTokensAsRevoked(AuthUserModel authUser, RefreshTokenModel refreshToken)
     {
         var tokensToRevoke = authUser.RefreshTokens
             .Where(r => r.IsActive)
@@ -90,6 +90,7 @@ public class TokenService(
             foreach (var token in tokensToRevoke)
             {
                 token.RevokedAt = now;
+                token.ReplacedByToken = refreshToken;
             }
         }
     }
@@ -102,6 +103,6 @@ public class TokenService(
             return null;
         }
         var tokenHash = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(refreshTokenValue)));
-        return await _ar.FindCurrentRefreshTokenAsync(tokenHash);
+        return await _ar.FindRefreshTokenByHashAsync(tokenHash);
     }
 }

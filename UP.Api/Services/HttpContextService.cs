@@ -1,12 +1,11 @@
 using System.Security.Claims;
-using UP.Api.Features.AppErrorFeature;
 
 namespace UP.Api.Services;
 
 public interface IHttpContextService
 {
     string? FindRequestCookieByKey(string key);
-    string GetCurrentAuthUserId();
+    string? GetCurrentAuthUserId();
     void AppendResponseCookie(string name, string value, CookieOptions options);
     void DeleteResponseCookie(string key, CookieOptions option);
 }
@@ -14,22 +13,9 @@ public interface IHttpContextService
 public class HttpContextService(IHttpContextAccessor accessor) : IHttpContextService
 {
     private readonly IHttpContextAccessor _accessor = accessor;
-    private IResponseCookies ResponseCookies => _accessor.HttpContext?.Response.Cookies
-        ?? throw new AuthError("Response cookies not found");
-
-    public string? FindRequestCookieByKey(string key)
-    {
-        var cookies = _accessor.HttpContext?.Request.Cookies;
-        return cookies?[key];
-    }
-
-    public void AppendResponseCookie(string name, string value, CookieOptions options) => ResponseCookies.Append(name, value, options);
-
-    public string GetCurrentAuthUserId()
-    {
-        return _accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new Exception("User could not be identified");
-    }
-
-    public void DeleteResponseCookie(string key, CookieOptions option) => ResponseCookies.Delete(key, option);
+    private IResponseCookies? ResponseCookies => _accessor.HttpContext?.Response.Cookies;
+    public string? FindRequestCookieByKey(string key) => _accessor.HttpContext?.Request.Cookies[key];
+    public void AppendResponseCookie(string name, string value, CookieOptions options) => ResponseCookies?.Append(name, value, options);
+    public string? GetCurrentAuthUserId() => _accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+    public void DeleteResponseCookie(string key, CookieOptions option) => ResponseCookies?.Delete(key, option);
 }

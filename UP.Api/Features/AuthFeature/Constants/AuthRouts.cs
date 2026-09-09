@@ -9,4 +9,5 @@ public static class AuthRouts
     public const string Logout = $"{Base}/logout";
     public const string Refresh = $"{Base}/refresh";
     public const string Register = $"{Base}/register";
+    public const string ChangePassword = $"{Base}/change-password";
 }

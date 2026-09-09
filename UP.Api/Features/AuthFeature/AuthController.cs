@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using UP.Api.Features.AuthFeature.Constants;
+using UP.Api.Features.AuthFeature.Requests;
 using UP.Api.Features.AuthFeature.Services;
 
 [ApiController]
@@ -44,6 +45,13 @@ public class AuthController(IAuthControllerService acs) : ControllerBase
     public async Task<IActionResult> Refresh()
     {
         await _acs.RefreshAsync();
+        return Ok();
+    }
+
+    [HttpPost(AuthRouts.ChangePassword)]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+    {
+        await _acs.ChangePasswordAsync(request);
         return Ok();
     }
 }

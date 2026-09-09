@@ -13,8 +13,9 @@ public interface IAuthRepository
     Task<AuthUserModel?> FindAuthUserByEmailAsync(string email);
     Task<bool> CheckPasswordAsync(AuthUserModel authUser, string password);
     Task<AuthUserModel?> FindAuthUserByIdAsync(string id);
-    Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync(string refreshTokenValue);
+    Task<RefreshTokenModel?> FindRefreshTokenByHashAsync(string refreshTokenValue);
     void RemoveRefreshTokens(ICollection<RefreshTokenModel> refreshTokens);
+    Task ChangePassword(AuthUserModel authUser, string currentPassword, string newPassword);
 }
 
 public class AuthRepository(
@@ -35,10 +36,11 @@ public class AuthRepository(
     public async Task<AuthUserModel?> FindAuthUserByIdAsync(string id) => await _manager.FindByIdAsync(id);
     public async Task<bool> CheckPasswordAsync(AuthUserModel authUser, string password)
         => await _manager.CheckPasswordAsync(authUser, password);
-    public async Task<RefreshTokenModel?> FindCurrentRefreshTokenAsync(string tokenHash) =>
+    public async Task<RefreshTokenModel?> FindRefreshTokenByHashAsync(string tokenHash) =>
          await _context.RefreshTokens
             .Include(r => r.AuthUser)
             .ThenInclude(a => a.RefreshTokens)
             .FirstOrDefaultAsync(r => r.TokenHash == tokenHash);
     public void RemoveRefreshTokens(ICollection<RefreshTokenModel> refreshTokens) => _context.RefreshTokens.RemoveRange(refreshTokens);
+    public async Task ChangePassword(AuthUserModel authUser, string currentPassword, string newPassword) => await _manager.ChangePasswordAsync(authUser, currentPassword, newPassword);
 }
