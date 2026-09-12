@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using UP.Api.Db;
+using UP.Api.Bootstrap;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Models.RefreshToken;
 

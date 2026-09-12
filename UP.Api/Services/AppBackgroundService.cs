@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using UP.Api.Db;
+using UP.Api.Bootstrap;
 
 namespace UP.Api.Services;
 

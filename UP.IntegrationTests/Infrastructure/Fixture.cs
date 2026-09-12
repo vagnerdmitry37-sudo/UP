@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;
 using Testcontainers.PostgreSql;
-using UP.Api.Db;
+using UP.Api.Bootstrap;
 
 namespace UP.IntegrationTests.Infrastructure;
 

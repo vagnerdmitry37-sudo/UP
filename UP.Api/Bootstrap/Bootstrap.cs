@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using UP.Api.BootstrapFeatuer;
-using UP.Api.Db;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AppUserFeature.Repositories;
-using UP.Api.Features.AuditLogFeature;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Options;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.Api.Features.AuthFeature.Services;
+using UP.Api.Features.CollectionFeature.Repositories;
+using UP.Api.Features.CollectionFeature.Services;
 using UP.Api.Services;
 
 namespace UP.Api.Bootstrap;
@@ -66,15 +65,15 @@ public class Bootstrap(WebApplicationBuilder builder)
         // User feature
         builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 
-        // AuditLog feature
-        builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-        builder.Services.AddScoped<IAudiLogRepository, AudiLogRepository>();
-
         // Auth feature
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddScoped<ITokenCookiesService, TokenCookiesService>();
         builder.Services.AddScoped<IAuthControllerService, AuthControllerService>();
         builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+        // Collection feature
+        builder.Services.AddScoped<ICollectionRepository, CollectionsRepository>();
+        builder.Services.AddScoped<ICollectionControllerService, CollectionsControllerService>();
     }
 
     private string AddCors()

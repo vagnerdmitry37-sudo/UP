@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using UP.Api.Db;
+using UP.Api.Bootstrap;
 using UP.Api.Features.AppErrorFeature;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models.RefreshToken;

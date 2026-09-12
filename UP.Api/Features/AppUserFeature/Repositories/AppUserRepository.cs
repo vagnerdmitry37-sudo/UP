@@ -1,4 +1,4 @@
-using UP.Api.Db;
+using UP.Api.Bootstrap;
 using UP.Api.Features.AppUserFeature.Models;
 
 namespace UP.Api.Features.AppUserFeature.Repositories;

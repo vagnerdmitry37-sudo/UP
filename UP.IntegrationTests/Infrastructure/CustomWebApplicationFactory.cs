@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using UP.Api.Db;
+using UP.Api.Bootstrap;
 
 namespace UP.IntegrationTests.Infrastructure;
 
