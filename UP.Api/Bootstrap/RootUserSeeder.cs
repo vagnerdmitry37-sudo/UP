@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 
 namespace UP.Api.Bootstrap;
@@ -10,21 +11,12 @@ public class RootUserSeeder
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
         var userManager = services.GetRequiredService<UserManager<AuthUserModel>>();
         var configuration = services.GetRequiredService<IConfiguration>();
+        var bootstrapOptions = services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
 
         const string rootRole = "Root";
 
-        var email = configuration["Bootstrap:Email"];
-        var password = configuration["Bootstrap:Password"];
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new InvalidOperationException("Bootstrap:Email is not configured.");
-        }
-
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            throw new InvalidOperationException("Bootstrap:Password is not configured.");
-        }
+        var email = bootstrapOptions.RootUserEmail;
+        var password = bootstrapOptions.RootUserPassword;
 
         if (!await roleManager.RoleExistsAsync(rootRole))
         {
@@ -52,8 +44,7 @@ public class RootUserSeeder
                 EmailConfirmed = true
             };
 
-            var userResult =
-                await userManager.CreateAsync(rootUser, password);
+            var userResult = await userManager.CreateAsync(rootUser, password);
 
             if (!userResult.Succeeded)
             {
