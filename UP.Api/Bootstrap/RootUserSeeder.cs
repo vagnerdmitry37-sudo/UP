@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using UP.Api.Features.AppUserFeature.Models;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 
 namespace UP.Api.Bootstrap;
@@ -12,6 +13,7 @@ public class RootUserSeeder
         var userManager = services.GetRequiredService<UserManager<AuthUserModel>>();
         var configuration = services.GetRequiredService<IConfiguration>();
         var bootstrapOptions = services.GetRequiredService<IOptions<BootstrapOptions>>().Value;
+        var context = services.GetRequiredService<AppDbContext>();
 
         const string rootRole = "Root";
 
@@ -44,6 +46,14 @@ public class RootUserSeeder
                 EmailConfirmed = true
             };
 
+            var rootAppUser = new AppUserModel
+            {
+                Name = rootRole,
+                Email = rootUser.Email,
+                AuthUser = rootUser
+            };
+
+            await context.AppUsers.AddAsync(rootAppUser);
             var userResult = await userManager.CreateAsync(rootUser, password);
 
             if (!userResult.Succeeded)

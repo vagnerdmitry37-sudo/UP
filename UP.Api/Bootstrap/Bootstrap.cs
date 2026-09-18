@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UP.Api.Features.AppErrorFeature;
+using UP.Api.Features.AppUserFeature.Repositories;
+using UP.Api.Features.AppUserFeature.Services;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Models.AuthUser;
 using UP.Api.Features.AuthFeature.Options;
@@ -69,6 +71,10 @@ public class Bootstrap(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IDbContextService, DbContextService>();
         builder.Services.AddScoped<IHttpContextService, HttpContextService>();
+
+        // App user feature
+        builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
+        builder.Services.AddScoped<IAppUserControllerService, AppUserControllerService>();
 
         // Auth feature
         builder.Services.AddScoped<ITokenService, TokenService>();

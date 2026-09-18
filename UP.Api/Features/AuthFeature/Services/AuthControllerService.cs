@@ -10,8 +10,7 @@ namespace UP.Api.Features.AuthFeature.Services;
 
 public interface IAuthControllerService
 {
-    Task MeAsync();
-    Task<AuthUserModel> RegisterAsync(RegisterRequest request);
+    Task RegisterAsync(RegisterRequest request);
     Task LoginAsync(LoginRequest request);
     Task LogoutAsync();
     Task RefreshAsync();
@@ -31,13 +30,7 @@ public class AuthControllerService(
     private readonly IHttpContextService _hcs = hcs;
     private readonly ITokenCookiesService _tcs = tcs;
 
-    public async Task MeAsync()
-    {
-        var currentAuthUserId = _hcs.GetCurrentAuthUserId() ?? throw new AuthError("Unauthorized user");
-        await _ar.FindAuthUserByIdAsync(currentAuthUserId);
-    }
-
-    public async Task<AuthUserModel> RegisterAsync(RegisterRequest request)
+    public async Task RegisterAsync(RegisterRequest request)
     {
         var existingAuthUser = await _ar.FindAuthUserByEmailAsync(request.Email);
         if (existingAuthUser != null)
@@ -57,8 +50,6 @@ public class AuthControllerService(
             string errorMessage = string.Join(", ", identityResult.Errors.Select(x => x.Description));
             throw new AuthError(errorMessage);
         }
-
-        return newAuthUser;
     }
 
     public async Task LoginAsync(LoginRequest request)

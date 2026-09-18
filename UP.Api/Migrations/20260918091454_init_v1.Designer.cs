@@ -12,7 +12,7 @@ using UP.Api.Bootstrap;
 namespace UP.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260915073559_init_v1")]
+    [Migration("20260918091454_init_v1")]
     partial class init_v1
     {
         /// <inheritdoc />
@@ -155,6 +155,33 @@ namespace UP.Api.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("UP.Api.Features.AppUserFeature.Models.AppUserModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthUserId")
+                        .IsUnique();
+
+                    b.ToTable("AppUsers");
                 });
 
             modelBuilder.Entity("UP.Api.Features.AuthFeature.Models.AuthUser.AuthUserModel", b =>
@@ -322,6 +349,17 @@ namespace UP.Api.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("UP.Api.Features.AppUserFeature.Models.AppUserModel", b =>
+                {
+                    b.HasOne("UP.Api.Features.AuthFeature.Models.AuthUser.AuthUserModel", "AuthUser")
+                        .WithOne()
+                        .HasForeignKey("UP.Api.Features.AppUserFeature.Models.AppUserModel", "AuthUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AuthUser");
                 });
 
             modelBuilder.Entity("UP.Api.Features.AuthFeature.Models.RefreshToken.RefreshTokenModel", b =>

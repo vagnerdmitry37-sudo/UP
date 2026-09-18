@@ -10,14 +10,6 @@ public class AuthController(IAuthControllerService acs) : ControllerBase
 {
     private readonly IAuthControllerService _acs = acs;
 
-    [HttpPost(AuthRouts.Me)]
-    public async Task<IActionResult> Me()
-    {
-        await _acs.MeAsync();
-
-        return Ok();
-    }
-
     [HttpPost(AuthRouts.Register)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
