@@ -1,35 +1,34 @@
+using System.Text.Json;
 using Mapster;
-using UP.Api.Features.AppErrorFeature;
+using Microsoft.AspNetCore.Mvc;
 using UP.Api.Features.AppUserFeature.Models;
-using UP.Api.Features.AppUserFeature.Repositories;
 using UP.Api.Services;
 
 namespace UP.Api.Features.AppUserFeature.Services;
 
 public interface IAppUserControllerService
 {
+    Task UpdateViewAsync(JsonDocument view);
     Task<AppUserDto> MeAsync();
 }
 
 public class AppUserControllerService(
-    IHttpContextService hcs,
-    IAppUserRepository aur) : IAppUserControllerService
+    IAppUserService aus,
+    IDbContextService dcs) : IAppUserControllerService
 {
-    private readonly IHttpContextService _hcs = hcs;
-    private readonly IAppUserRepository _aur = aur;
+    private readonly IAppUserService _aus = aus;
+    private readonly IDbContextService _dcs = dcs;
 
     public async Task<AppUserDto> MeAsync()
     {
-        var currentAuthUserIdString = _hcs.GetCurrentAuthUserId() ?? throw new AuthError("No user id");
+        var appUser = await _aus.FindAppUserByAuthUserId();
+        return appUser.Adapt<AppUserDto>();
+    }
 
-        if (int.TryParse(currentAuthUserIdString, out int currentAuthUserIdInt))
-        {
-            var appUser = await _aur.FindAppUserByAuthUserId(currentAuthUserIdInt) ?? throw new AuthError("User not found");
-            return appUser.Adapt<AppUserDto>();
-        }
-        else
-        {
-            throw new AuthError("No user id");
-        }
+    public async Task UpdateViewAsync([FromBody] JsonDocument view)
+    {
+        var appUser = await _aus.FindAppUserByAuthUserId();
+        appUser.View = view;
+        await _dcs.SaveChangesAsync();
     }
 }

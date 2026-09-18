@@ -73,6 +73,7 @@ public class Bootstrap(WebApplicationBuilder builder)
         builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 
         // App user feature
+        builder.Services.AddScoped<IAppUserService, AppUserService>();
         builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
         builder.Services.AddScoped<IAppUserControllerService, AppUserControllerService>();
 
