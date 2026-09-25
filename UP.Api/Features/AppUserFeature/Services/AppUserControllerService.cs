@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Mapster;
-using Microsoft.AspNetCore.Mvc;
-using UP.Api.Features.AppUserFeature.Models;
+using UP.Api.Features.AppUserFeature.Responses;
 using UP.Api.Services;
 
 namespace UP.Api.Features.AppUserFeature.Services;
@@ -9,7 +8,7 @@ namespace UP.Api.Features.AppUserFeature.Services;
 public interface IAppUserControllerService
 {
     Task UpdateViewAsync(JsonDocument view);
-    Task<AppUserDto> MeAsync();
+    Task<AppUserResponse> MeAsync();
 }
 
 public class AppUserControllerService(
@@ -19,16 +18,14 @@ public class AppUserControllerService(
     private readonly IAppUserService _aus = aus;
     private readonly IDbContextService _dcs = dcs;
 
-    public async Task<AppUserDto> MeAsync()
+    public async Task<AppUserResponse> MeAsync()
     {
         var appUser = await _aus.FindAppUserByAuthUserId();
-        return appUser.Adapt<AppUserDto>();
+        return appUser.Adapt<AppUserResponse>();
     }
 
-    public async Task UpdateViewAsync([FromBody] JsonDocument view)
+    public async Task UpdateViewAsync(JsonDocument view)
     {
-        var appUser = await _aus.FindAppUserByAuthUserId();
-        appUser.View = view;
         await _dcs.SaveChangesAsync();
     }
 }

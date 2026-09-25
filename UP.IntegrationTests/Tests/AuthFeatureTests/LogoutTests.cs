@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
+using UP.Api.Features.AppUserFeature.Constants;
 using UP.Api.Features.AuthFeature.Constants;
 using UP.Api.Features.AuthFeature.Repositories;
 using UP.IntegrationTests.Infrastructure;
@@ -23,7 +24,7 @@ public class LogoutTests(Fixture fixture) : TestBase(fixture)
 
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var meResponse = await Fixture.Client.PostAsync(AuthRouts.Me, null);
+        var meResponse = await Fixture.Client.GetAsync(AppUserRoutes.Me);
 
         meResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 

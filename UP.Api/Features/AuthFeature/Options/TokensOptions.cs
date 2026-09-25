@@ -1,6 +1,6 @@
 namespace UP.Api.Features.AuthFeature.Options;
 
-public class AuthOptions
+public sealed class TokensOptions
 {
     public required int MaxConcurrentFamilies { get; init; }
     public required int AccessTokenLifetimeMinutes { get; init; }

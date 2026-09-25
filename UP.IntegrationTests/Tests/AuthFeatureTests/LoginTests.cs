@@ -133,7 +133,7 @@ public class LoginTests(Fixture fixture) : TestBase(fixture)
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var ts = scope.ServiceProvider.GetRequiredService<ITokenService>();
         var ar = scope.ServiceProvider.GetRequiredService<IAuthRepository>();
-        var ao = scope.ServiceProvider.GetRequiredService<IOptions<AuthOptions>>();
+        var to = scope.ServiceProvider.GetRequiredService<IOptions<TokensOptions>>().Value;
         var authUser = await ar.FindAuthUserByEmailAsync(credantials.Email);
         ICollection<RefreshTokenModel> refreshTokens = [];
 
@@ -152,7 +152,7 @@ public class LoginTests(Fixture fixture) : TestBase(fixture)
             .Where(rt => rt.RevokedAt == null && rt.ExpiresAt > DateTimeOffset.UtcNow)
             .ToListAsync();
 
-        existingRefreshTokens.Should().HaveCount(ao.Value.MaxConcurrentFamilies);
+        existingRefreshTokens.Should().HaveCount(to.MaxConcurrentFamilies);
     }
 
     [Fact]

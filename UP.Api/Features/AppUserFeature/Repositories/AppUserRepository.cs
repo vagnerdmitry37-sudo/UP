@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UP.Api.Bootstrap;
-using UP.Api.Features.AppUserFeature.Models;
+using UP.Api.Features.AppUserFeature.Models.AppUser;
 
 namespace UP.Api.Features.AppUserFeature.Repositories;
 

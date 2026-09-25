@@ -1,5 +1,5 @@
 using UP.Api.Features.AppErrorFeature;
-using UP.Api.Features.AppUserFeature.Models;
+using UP.Api.Features.AppUserFeature.Models.AppUser;
 using UP.Api.Features.AppUserFeature.Repositories;
 using UP.Api.Services;
 
@@ -23,7 +23,8 @@ public class AppUserService(
 
         if (int.TryParse(currentAuthUserIdString, out int currentAuthUserIdInt))
         {
-            return await _aur.FindAppUserByAuthUserId(currentAuthUserIdInt) ?? throw new AuthError("Authenticated user ID is invalid");
+            return await _aur.FindAppUserByAuthUserId(currentAuthUserIdInt)
+                ?? throw new AuthError("Authenticated user ID is invalid");
         }
         else
         {

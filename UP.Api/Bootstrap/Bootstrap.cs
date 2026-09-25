@@ -1,9 +1,11 @@
 using System.Text;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UP.Api.Features.AppErrorFeature;
+using UP.Api.Features.AppUserFeature.Models.AppUser;
 using UP.Api.Features.AppUserFeature.Repositories;
 using UP.Api.Features.AppUserFeature.Services;
 using UP.Api.Features.AuthFeature.Constants;
@@ -22,49 +24,17 @@ public enum CorsMode
 
 public class Bootstrap(WebApplicationBuilder builder)
 {
+    private void AddMapings()
+    {
+        var config = TypeAdapterConfig.GlobalSettings;
+        config.Scan(typeof(AppUserMappingConfiguration).Assembly);
+
+        builder.Services.AddSingleton(config);
+    }
+
     private void AddOptions()
     {
-        builder.Services
-            .AddOptions<BootstrapOptions>()
-            .BindConfiguration("Bootstrap")
-            .Validate(options =>
-                !string.IsNullOrWhiteSpace(options.RootUserEmail),
-                "Bootstrap email must be configured.")
-            .Validate(options =>
-                !string.IsNullOrWhiteSpace(options.RootUserPassword),
-                "Bootstrap password must be configured.")
-            .ValidateOnStart();
-
-        builder.Services
-            .AddOptions<JwtOptions>()
-            .BindConfiguration("Jwt")
-            .Validate(options =>
-                !string.IsNullOrWhiteSpace(options.Key),
-                "JWT signing key must be configured.")
-            .Validate(options =>
-                options.Key.Length >= 32,
-                "JWT signing key must be at least 32 characters long.")
-            .Validate(options =>
-                !string.IsNullOrWhiteSpace(options.Issuer),
-                "JWT issuer must be configured.")
-            .Validate(options =>
-                !string.IsNullOrWhiteSpace(options.Audience),
-                "JWT audience must be configured.")
-            .ValidateOnStart();
-
-        builder.Services
-            .AddOptions<AuthOptions>()
-            .BindConfiguration("Auth")
-            .Validate(options =>
-                options.MaxConcurrentFamilies > 0,
-                "Maximum concurrent families must be greater than 0.")
-            .Validate(options =>
-                options.AccessTokenLifetimeMinutes > 0,
-                "Access token lifetime must be greater than 0 minutes.")
-            .Validate(options =>
-                options.RefreshTokenLifetimeMinutes > 0,
-                "Refresh token lifetime must be greater than 0 minutes.")
-            .ValidateOnStart();
+        AuthOptionsConfigurations.Init(builder);
     }
 
     private void AddScoped()
@@ -147,7 +117,7 @@ public class Bootstrap(WebApplicationBuilder builder)
 
     public string Init()
     {
-        var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
+        var jwtOptions = builder.Configuration.GetSection("Options:Jwt").Get<JwtOptions>()
             ?? throw new Exception("JwtOptions should exist");
 
         AddOptions();
@@ -155,6 +125,7 @@ public class Bootstrap(WebApplicationBuilder builder)
         AddDbContext();
         AddIdentityCore();
         AddJwtBearer(jwtOptions);
+        AddMapings();
 
         var corseMode = AddCors();
 

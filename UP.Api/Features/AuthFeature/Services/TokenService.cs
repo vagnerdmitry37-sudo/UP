@@ -26,12 +26,12 @@ public class TokenService(
     IAuthRepository ar,
     IHttpContextService hcs,
     IOptions<JwtOptions> jwtOptions,
-    IOptions<AuthOptions> authOptions) : ITokenService
+    IOptions<TokensOptions> tokensOptions) : ITokenService
 {
     private readonly IAuthRepository _ar = ar;
     private readonly IHttpContextService _hcs = hcs;
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
-    private readonly AuthOptions _authOptions = authOptions.Value;
+    private readonly TokensOptions _tokensOptions = tokensOptions.Value;
 
     public string GenerateAccessToken(AuthUserModel authUser)
     {
@@ -49,7 +49,7 @@ public class TokenService(
             issuer: _jwtOptions.Issuer,
             audience: _jwtOptions.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_authOptions.AccessTokenLifetimeMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_tokensOptions.AccessTokenLifetimeMinutes),
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -68,7 +68,7 @@ public class TokenService(
             {
                 TokenHash = tokenHash,
                 CreatedAt = now,
-                ExpiresAt = now.AddMinutes(_authOptions.RefreshTokenLifetimeMinutes),
+                ExpiresAt = now.AddMinutes(_tokensOptions.RefreshTokenLifetimeMinutes),
                 AuthUserId = authUserId,
                 FamilyId = familyId ?? Guid.NewGuid(),
             }
@@ -80,7 +80,7 @@ public class TokenService(
         var tokensToRevoke = authUser.RefreshTokens
             .Where(r => r.IsActive)
             .OrderByDescending(x => x.CreatedAt)
-            .Skip(_authOptions.MaxConcurrentFamilies - 1)
+            .Skip(_tokensOptions.MaxConcurrentFamilies - 1)
             .ToList();
 
         if (tokensToRevoke.Count > 0)

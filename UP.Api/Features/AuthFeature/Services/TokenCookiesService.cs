@@ -13,12 +13,12 @@ public interface ITokenCookiesService
 
 public class TokenCookiesService(
     IHttpContextService hcs,
-    IOptions<AuthOptions> authOptions,
+    IOptions<TokensOptions> tokensOptions,
     IWebHostEnvironment environment
     ) : ITokenCookiesService
 {
     private readonly IHttpContextService _hcs = hcs;
-    private readonly AuthOptions _authOptions = authOptions.Value;
+    private readonly TokensOptions _tokensOptions = tokensOptions.Value;
     private readonly IWebHostEnvironment _environment = environment;
 
     public void SetTokenCookies(string accessToken, string refreshTokenValue)
@@ -39,8 +39,8 @@ public class TokenCookiesService(
 
     private (CookieOptions, CookieOptions) CreateTokensCookieOptions()
     {
-        var accessTokenOptions = CreateCookieOptions("/", _authOptions.AccessTokenLifetimeMinutes);
-        var refreshTokenOptions = CreateCookieOptions($"/{AuthRouts.Base}", _authOptions.RefreshTokenLifetimeMinutes);
+        var accessTokenOptions = CreateCookieOptions("/", _tokensOptions.AccessTokenLifetimeMinutes);
+        var refreshTokenOptions = CreateCookieOptions($"/{AuthRouts.Base}", _tokensOptions.RefreshTokenLifetimeMinutes);
 
         return (accessTokenOptions, refreshTokenOptions);
     }

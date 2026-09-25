@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace UP.Api.Features.AppUserFeature.Models;
+namespace UP.Api.Features.AppUserFeature.Models.AppUser;
 
 public class AppUserConfiguration : IEntityTypeConfiguration<AppUserModel>
 {
